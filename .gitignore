@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.log
+
+# Keep data structure but not content
+data/cards/*
+!data/cards/.gitkeep

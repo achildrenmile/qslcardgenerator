@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - QSL Card Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #1a1a2e;
+      --card-bg: #16213e;
+      --accent: #e94560;
+      --success: #22c55e;
+      --text: #eee;
+      --text-muted: #aaa;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .card-container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .form-control, .form-select {
+      background: #0f0f23;
+      border: 1px solid #333;
+      color: var(--text);
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: #0f0f23;
+      border-color: var(--accent);
+      color: var(--text);
+      box-shadow: 0 0 0 0.2rem rgba(233, 69, 96, 0.25);
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+
+    .btn-accent:hover {
+      background: #c73e54;
+      color: white;
+    }
+
+    .callsign-item {
+      background: #0f0f23;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .callsign-item h4 {
+      margin: 0;
+      color: var(--accent);
+    }
+
+    .callsign-item p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .auth-container {
+      max-width: 400px;
+      margin: 100px auto;
+    }
+
+    .bg-item {
+      display: inline-flex;
+      align-items: center;
+      background: #0f0f23;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin: 3px;
+      font-size: 0.85rem;
+    }
+
+    .bg-item button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      margin-left: 8px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .alert {
+      border: none;
+    }
+
+    .nav-pills .nav-link {
+      color: var(--text-muted);
+    }
+
+    .nav-pills .nav-link.active {
+      background: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <!-- Auth Section -->
+    <div id="authSection" class="auth-container">
+      <div class="card-container">
+        <h3 class="mb-4">Admin Login</h3>
+        <div class="mb-3">
+          <label class="form-label">Admin Token</label>
+          <input type="password" class="form-control" id="adminToken" placeholder="Enter admin token">
+        </div>
+        <button class="btn btn-accent w-100" onclick="authenticate()">Login</button>
+        <div id="authError" class="text-danger mt-2" style="display:none;">Invalid token</div>
+      </div>
+    </div>
+
+    <!-- Admin Section -->
+    <div id="adminSection" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>QSL Card Admin</h2>
+        <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+
+      <ul class="nav nav-pills mb-4" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#callsignsTab">Callsigns</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#addTab">Add New</button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#manageTab">Manage</button>
+        </li>
+      </ul>
+
+      <div class="tab-content">
+        <!-- Callsigns List Tab -->
+        <div class="tab-pane fade show active" id="callsignsTab">
+          <div class="card-container">
+            <h4 class="mb-3">Registered Callsigns</h4>
+            <div id="callsignsList"></div>
+          </div>
+        </div>
+
+        <!-- Add New Tab -->
+        <div class="tab-pane fade" id="addTab">
+          <div class="card-container">
+            <h4 class="mb-3">Add New Callsign</h4>
+            <div id="addAlert"></div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Callsign ID</label>
+                <input type="text" class="form-control" id="newId" placeholder="e.g., oe8yml">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Display Name</label>
+                <input type="text" class="form-control" id="newName" placeholder="e.g., OE8YML Station">
+              </div>
+              <div class="col-12">
+                <label class="form-label">QRZ Link (optional)</label>
+                <input type="text" class="form-control" id="newQrzLink" placeholder="https://www.qrz.com/db/OE8YML">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-accent" onclick="createCallsign()">Create Callsign</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div class="tab-pane fade" id="manageTab">
+          <div class="card-container">
+            <h4 class="mb-3">Manage Callsign</h4>
+
+            <div class="mb-3">
+              <label class="form-label">Select Callsign</label>
+              <select class="form-select" id="manageSelect" onchange="loadCallsignDetails()">
+                <option value="">-- Select --</option>
+              </select>
+            </div>
+
+            <div id="manageDetails" style="display:none;">
+              <hr>
+              <div id="manageAlert"></div>
+
+              <!-- Card Upload -->
+              <div class="mb-4">
+                <h5>Card Template</h5>
+                <p class="text-muted small">Upload the card.png template (4837 x 3078 px recommended)</p>
+                <input type="file" class="form-control mb-2" id="cardUpload" accept="image/png">
+                <button class="btn btn-accent btn-sm" onclick="uploadCard()">Upload Card Template</button>
+              </div>
+
+              <!-- Background Upload -->
+              <div class="mb-4">
+                <h5>Backgrounds</h5>
+                <div id="backgroundsList" class="mb-3"></div>
+                <input type="file" class="form-control mb-2" id="bgUpload" accept="image/*" multiple>
+                <button class="btn btn-accent btn-sm" onclick="uploadBackgrounds()">Upload Backgrounds</button>
+              </div>
+
+              <!-- Text Positions -->
+              <div class="mb-4">
+                <h5>Text Positions</h5>
+                <p class="text-muted small">Customize where text appears on the card (in pixels)</p>
+                <div class="row g-2" id="positionsForm"></div>
+                <button class="btn btn-accent btn-sm mt-2" onclick="savePositions()">Save Positions</button>
+              </div>
+
+              <!-- Delete -->
+              <div class="mt-4 pt-4 border-top border-secondary">
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteCallsign()">Delete Callsign</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let token = localStorage.getItem('adminToken') || '';
+    let callsigns = [];
+
+    // Authentication
+    async function authenticate() {
+      token = document.getElementById('adminToken').value;
+
+      try {
+        const response = await fetch('/api/callsigns', {
+          headers: { 'X-Admin-Token': token }
+        });
+
+        if (response.ok) {
+          localStorage.setItem('adminToken', token);
+          showAdmin();
+        } else {
+          document.getElementById('authError').style.display = 'block';
+        }
+      } catch (e) {
+        document.getElementById('authError').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('adminToken');
+      token = '';
+      document.getElementById('adminSection').style.display = 'none';
+      document.getElementById('authSection').style.display = 'block';
+    }
+
+    function showAdmin() {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('adminSection').style.display = 'block';
+      loadCallsigns();
+    }
+
+    // API calls with auth
+    async function apiCall(url, options = {}) {
+      options.headers = {
+        ...options.headers,
+        'X-Admin-Token': token
+      };
+      return fetch(url, options);
+    }
+
+    // Load callsigns
+    async function loadCallsigns() {
+      try {
+        const response = await fetch('/api/callsigns');
+        callsigns = await response.json();
+
+        // Update list
+        const list = document.getElementById('callsignsList');
+        if (callsigns.length === 0) {
+          list.innerHTML = '<p class="text-muted">No callsigns registered</p>';
+        } else {
+          list.innerHTML = callsigns.map(cs => `
+            <div class="callsign-item">
+              <div>
+                <h4>${cs.id.toUpperCase()}</h4>
+                <p>${cs.name}</p>
+              </div>
+              <a href="/${cs.id}" target="_blank" class="btn btn-sm btn-outline-light">Open</a>
+            </div>
+          `).join('');
+        }
+
+        // Update select
+        const select = document.getElementById('manageSelect');
+        select.innerHTML = '<option value="">-- Select --</option>' +
+          callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()} - ${cs.name}</option>`).join('');
+      } catch (e) {
+        console.error('Failed to load callsigns:', e);
+      }
+    }
+
+    // Create callsign
+    async function createCallsign() {
+      const id = document.getElementById('newId').value.trim();
+      const name = document.getElementById('newName').value.trim();
+      const qrzLink = document.getElementById('newQrzLink').value.trim();
+
+      if (!id || !name) {
+        showAlert('addAlert', 'Please fill in ID and Name', 'danger');
+        return;
+      }
+
+      try {
+        const response = await apiCall('/api/admin/callsigns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, name, qrzLink })
+        });
+
+        if (response.ok) {
+          showAlert('addAlert', 'Callsign created successfully!', 'success');
+          document.getElementById('newId').value = '';
+          document.getElementById('newName').value = '';
+          document.getElementById('newQrzLink').value = '';
+          loadCallsigns();
+        } else {
+          const err = await response.json();
+          showAlert('addAlert', err.error || 'Failed to create', 'danger');
+        }
+      } catch (e) {
+        showAlert('addAlert', 'Request failed', 'danger');
+      }
+    }
+
+    // Load callsign details for management
+    async function loadCallsignDetails() {
+      const callsign = document.getElementById('manageSelect').value;
+      const details = document.getElementById('manageDetails');
+
+      if (!callsign) {
+        details.style.display = 'none';
+        return;
+      }
+
+      try {
+        const [configRes, bgRes] = await Promise.all([
+          fetch(`/api/callsigns/${callsign}`),
+          fetch(`/api/callsigns/${callsign}/backgrounds`)
+        ]);
+
+        const config = await configRes.json();
+        const backgrounds = await bgRes.json();
+
+        // Show backgrounds
+        const bgList = document.getElementById('backgroundsList');
+        if (backgrounds.length === 0) {
+          bgList.innerHTML = '<p class="text-muted small">No backgrounds uploaded</p>';
+        } else {
+          bgList.innerHTML = backgrounds.map(bg => `
+            <span class="bg-item">
+              ${bg.displayName}
+              <button onclick="deleteBackground('${callsign}', '${bg.filename}')">&times;</button>
+            </span>
+          `).join('');
+        }
+
+        // Show positions form
+        const posForm = document.getElementById('positionsForm');
+        const fields = ['callsign', 'utcDateTime', 'frequency', 'mode', 'rst', 'additional'];
+        const labels = { callsign: 'Callsign', utcDateTime: 'Date/Time', frequency: 'Frequency', mode: 'Mode', rst: 'RST', additional: 'Remarks' };
+
+        posForm.innerHTML = fields.map(field => `
+          <div class="col-6 col-md-4">
+            <label class="form-label small">${labels[field]} X</label>
+            <input type="number" class="form-control form-control-sm" id="pos_${field}_x" value="${config.textPositions?.[field]?.x || 0}">
+          </div>
+          <div class="col-6 col-md-4">
+            <label class="form-label small">${labels[field]} Y</label>
+            <input type="number" class="form-control form-control-sm" id="pos_${field}_y" value="${config.textPositions?.[field]?.y || 0}">
+          </div>
+        `).join('');
+
+        details.style.display = 'block';
+      } catch (e) {
+        console.error('Failed to load details:', e);
+      }
+    }
+
+    // Upload card
+    async function uploadCard() {
+      const callsign = document.getElementById('manageSelect').value;
+      const file = document.getElementById('cardUpload').files[0];
+
+      if (!file) {
+        showAlert('manageAlert', 'Please select a file', 'danger');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await apiCall(`/api/admin/callsigns/${callsign}/upload/card`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          showAlert('manageAlert', 'Card uploaded successfully!', 'success');
+          document.getElementById('cardUpload').value = '';
+        } else {
+          showAlert('manageAlert', 'Upload failed', 'danger');
+        }
+      } catch (e) {
+        showAlert('manageAlert', 'Upload failed', 'danger');
+      }
+    }
+
+    // Upload backgrounds
+    async function uploadBackgrounds() {
+      const callsign = document.getElementById('manageSelect').value;
+      const files = document.getElementById('bgUpload').files;
+
+      if (files.length === 0) {
+        showAlert('manageAlert', 'Please select files', 'danger');
+        return;
+      }
+
+      let success = 0;
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+          const response = await apiCall(`/api/admin/callsigns/${callsign}/upload/background`, {
+            method: 'POST',
+            body: formData
+          });
+          if (response.ok) success++;
+        } catch (e) {}
+      }
+
+      showAlert('manageAlert', `Uploaded ${success}/${files.length} files`, success === files.length ? 'success' : 'warning');
+      document.getElementById('bgUpload').value = '';
+      loadCallsignDetails();
+    }
+
+    // Delete background
+    async function deleteBackground(callsign, filename) {
+      if (!confirm(`Delete ${filename}?`)) return;
+
+      try {
+        const response = await apiCall(`/api/admin/callsigns/${callsign}/backgrounds/${filename}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          loadCallsignDetails();
+        }
+      } catch (e) {
+        console.error('Delete failed:', e);
+      }
+    }
+
+    // Save positions
+    async function savePositions() {
+      const callsign = document.getElementById('manageSelect').value;
+      const fields = ['callsign', 'utcDateTime', 'frequency', 'mode', 'rst', 'additional'];
+
+      const textPositions = {};
+      fields.forEach(field => {
+        textPositions[field] = {
+          x: parseInt(document.getElementById(`pos_${field}_x`).value) || 0,
+          y: parseInt(document.getElementById(`pos_${field}_y`).value) || 0
+        };
+      });
+
+      try {
+        const response = await apiCall(`/api/admin/callsigns/${callsign}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ textPositions })
+        });
+
+        if (response.ok) {
+          showAlert('manageAlert', 'Positions saved!', 'success');
+        } else {
+          showAlert('manageAlert', 'Save failed', 'danger');
+        }
+      } catch (e) {
+        showAlert('manageAlert', 'Save failed', 'danger');
+      }
+    }
+
+    // Delete callsign
+    async function deleteCallsign() {
+      const callsign = document.getElementById('manageSelect').value;
+      if (!confirm(`Delete ${callsign.toUpperCase()}? This cannot be undone.`)) return;
+
+      try {
+        const response = await apiCall(`/api/admin/callsigns/${callsign}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showAlert('manageAlert', 'Callsign deleted', 'success');
+          document.getElementById('manageSelect').value = '';
+          document.getElementById('manageDetails').style.display = 'none';
+          loadCallsigns();
+        }
+      } catch (e) {
+        showAlert('manageAlert', 'Delete failed', 'danger');
+      }
+    }
+
+    // Show alert
+    function showAlert(id, message, type) {
+      document.getElementById(id).innerHTML = `<div class="alert alert-${type} py-2">${message}</div>`;
+      setTimeout(() => {
+        document.getElementById(id).innerHTML = '';
+      }, 3000);
+    }
+
+    // Check if already authenticated
+    if (token) {
+      showAdmin();
+    }
+  </script>
+</body>
+</html>

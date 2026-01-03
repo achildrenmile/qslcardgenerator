@@ -1,0 +1,17 @@
+services:
+  qslgen:
+    build: .
+    container_name: qslcardgenerator
+    restart: unless-stopped
+    ports:
+      - "3400:3400"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PORT=3400
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-changeme}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3400/api/callsigns"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

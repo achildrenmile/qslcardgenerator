@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QSL Card Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #1a1a2e;
+      --card-bg: #16213e;
+      --accent: #e94560;
+      --text: #eee;
+      --text-muted: #aaa;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .card-container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    #qslCanvas {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .form-control, .form-select {
+      background: #0f0f23;
+      border: 1px solid #333;
+      color: var(--text);
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: #0f0f23;
+      border-color: var(--accent);
+      color: var(--text);
+      box-shadow: 0 0 0 0.2rem rgba(233, 69, 96, 0.25);
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-label {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      padding: 12px 30px;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #c73e54;
+    }
+
+    .caps {
+      text-transform: uppercase;
+    }
+
+    .header-info {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header-info h1 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .header-info a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #333;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 10px; }
+      .card-container { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div id="loading" class="loading">
+      <div class="loading-spinner mx-auto mb-3"></div>
+      <p>Loading...</p>
+    </div>
+
+    <div id="content" style="display: none;">
+      <div class="header-info mb-4">
+        <h1 id="stationName">QSL Card Generator</h1>
+        <a id="qrzLink" href="#" target="_blank"></a>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="card-container">
+            <canvas id="qslCanvas"></canvas>
+          </div>
+          <div class="text-center mt-3">
+            <button id="downloadBtn" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+              </svg>
+              QSL Karte speichern
+            </button>
+          </div>
+        </div>
+
+        <div class="col-lg-5">
+          <div class="card-container">
+            <form id="qslForm">
+              <div class="mb-3">
+                <label for="callsign" class="form-label">Rufzeichen der Gegenstation</label>
+                <input type="text" class="form-control caps" id="callsign" placeholder="z.B. DL5XYZ">
+              </div>
+
+              <div class="mb-3">
+                <label for="utcDateTime" class="form-label">UTC Datum/Uhrzeit (dd.mm.yyyy hh:mm)</label>
+                <input type="text" class="form-control" id="utcDateTime" placeholder="dd.mm.yyyy hh:mm">
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-4">
+                  <label for="frequency" class="form-label">Frequenz (MHz)</label>
+                  <input type="text" class="form-control" id="frequency" placeholder="145.500">
+                </div>
+                <div class="col-4">
+                  <label for="mode" class="form-label">Modus</label>
+                  <input type="text" class="form-control caps" id="mode" placeholder="FM">
+                </div>
+                <div class="col-4">
+                  <label for="rst" class="form-label">RST</label>
+                  <input type="text" class="form-control" id="rst" placeholder="59">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="additional" class="form-label">Zusätzliche Bemerkung</label>
+                <textarea class="form-control" id="additional" rows="2" style="resize:none">Thanks for the QSO
+Best regards</textarea>
+              </div>
+
+              <div class="mb-3">
+                <label for="backgroundSelect" class="form-label">Hintergrund</label>
+                <select class="form-select" id="backgroundSelect">
+                  <option value="">-- Bitte wählen --</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="customBackground" class="form-label">Eigenes Bild hochladen</label>
+                <input type="file" class="form-control" id="customBackground" accept="image/*">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get callsign from URL
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const CALLSIGN = pathParts[0] || '';
+
+    let config = null;
+    let positions = null;
+    const SCALE_FACTOR = 0.4;
+
+    const canvas = document.getElementById('qslCanvas');
+    const ctx = canvas.getContext('2d');
+    const cardImage = new Image();
+    const backgroundImage = new Image();
+
+    // Load callsign configuration
+    async function loadConfig() {
+      try {
+        const response = await fetch(`/api/callsigns/${CALLSIGN}`);
+        if (!response.ok) {
+          window.location.href = '/';
+          return;
+        }
+        config = await response.json();
+        positions = config.textPositions;
+
+        document.getElementById('stationName').textContent = config.name;
+        document.getElementById('qrzLink').href = config.qrzLink;
+        document.getElementById('qrzLink').textContent = config.id.toUpperCase();
+        document.title = `QSL Card - ${config.id.toUpperCase()}`;
+
+        await loadBackgrounds();
+        loadCardImage();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load config:', error);
+        document.getElementById('loading').innerHTML = '<p class="text-danger">Failed to load configuration</p>';
+      }
+    }
+
+    // Load backgrounds list
+    async function loadBackgrounds() {
+      try {
+        const response = await fetch(`/api/callsigns/${CALLSIGN}/backgrounds`);
+        const backgrounds = await response.json();
+
+        const select = document.getElementById('backgroundSelect');
+        select.innerHTML = '<option value="">-- Bitte wählen --</option>';
+
+        backgrounds.forEach(bg => {
+          const option = document.createElement('option');
+          option.value = bg.filename;
+          option.textContent = bg.displayName;
+          select.appendChild(option);
+        });
+
+        // Select first background if available
+        if (backgrounds.length > 0) {
+          select.value = backgrounds[0].filename;
+          loadBackground(backgrounds[0].filename);
+        }
+      } catch (error) {
+        console.error('Failed to load backgrounds:', error);
+      }
+    }
+
+    // Load card template image
+    function loadCardImage() {
+      cardImage.onload = () => {
+        canvas.width = cardImage.width * SCALE_FACTOR;
+        canvas.height = cardImage.height * SCALE_FACTOR;
+        drawCanvas();
+      };
+      cardImage.src = `/cards/${CALLSIGN}/card.png`;
+    }
+
+    // Load background image
+    function loadBackground(filename) {
+      backgroundImage.onload = drawCanvas;
+      backgroundImage.src = `/cards/${CALLSIGN}/backgrounds/${filename}`;
+    }
+
+    // Draw canvas with all layers
+    function drawCanvas() {
+      if (!cardImage.complete) return;
+
+      // Draw background if loaded
+      if (backgroundImage.complete && backgroundImage.src) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = '#333';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // Draw card template overlay
+      ctx.drawImage(cardImage, 0, 0, canvas.width, canvas.height);
+
+      // Get form values
+      const callsign = document.getElementById('callsign').value.toUpperCase();
+      const utcDateTime = document.getElementById('utcDateTime').value;
+      const frequency = document.getElementById('frequency').value;
+      const mode = document.getElementById('mode').value.toUpperCase();
+      const rst = document.getElementById('rst').value;
+      const additional = document.getElementById('additional').value.split('\n');
+
+      // Format date/time
+      let formattedDateTime = utcDateTime;
+      if (utcDateTime) {
+        try {
+          const parts = utcDateTime.split(' ');
+          const datePart = parts[0].split('.');
+          const timePart = (parts[1] || '00:00').split(':');
+          const d = new Date(datePart[2], datePart[1] - 1, datePart[0], timePart[0], timePart[1]);
+          formattedDateTime = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        } catch (e) {}
+      }
+
+      // Draw text fields
+      ctx.fillStyle = 'black';
+      ctx.textBaseline = 'middle';
+
+      // Callsign
+      ctx.font = `${100 * SCALE_FACTOR}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText(callsign, positions.callsign.x * SCALE_FACTOR, positions.callsign.y * SCALE_FACTOR);
+
+      // Date/Time
+      ctx.font = `${80 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(formattedDateTime, positions.utcDateTime.x * SCALE_FACTOR, positions.utcDateTime.y * SCALE_FACTOR);
+
+      // Frequency, Mode, RST
+      ctx.font = `${100 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(frequency, positions.frequency.x * SCALE_FACTOR, positions.frequency.y * SCALE_FACTOR);
+      ctx.fillText(mode, positions.mode.x * SCALE_FACTOR, positions.mode.y * SCALE_FACTOR);
+      ctx.fillText(rst, positions.rst.x * SCALE_FACTOR, positions.rst.y * SCALE_FACTOR);
+
+      // Additional remarks
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.font = `bold ${100 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(additional[0] || '', positions.additional.x * SCALE_FACTOR, positions.additional.y * SCALE_FACTOR);
+      ctx.fillText(additional[1] || '', positions.additional.x * SCALE_FACTOR, positions.additional.y * SCALE_FACTOR + (120 * SCALE_FACTOR));
+    }
+
+    // Event listeners
+    document.getElementById('backgroundSelect').addEventListener('change', function() {
+      if (this.value) {
+        loadBackground(this.value);
+        // Remove custom option if exists
+        const customOpt = this.querySelector('option[value="custom"]');
+        if (customOpt) customOpt.remove();
+      }
+    });
+
+    document.getElementById('customBackground').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          backgroundImage.src = ev.target.result;
+
+          const select = document.getElementById('backgroundSelect');
+          let customOpt = select.querySelector('option[value="custom"]');
+          if (!customOpt) {
+            customOpt = document.createElement('option');
+            customOpt.value = 'custom';
+            customOpt.textContent = 'Eigenes Bild';
+            select.appendChild(customOpt);
+          }
+          select.value = 'custom';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Form input listeners
+    document.querySelectorAll('#qslForm input, #qslForm textarea').forEach(el => {
+      el.addEventListener('input', drawCanvas);
+    });
+
+    // Download button
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const callsignVal = document.getElementById('callsign').value || 'QSL';
+      const link = document.createElement('a');
+      link.download = `${callsignVal.toUpperCase()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Set current UTC time
+    function setCurrentUTC() {
+      const now = new Date();
+      const formatted = `${String(now.getUTCDate()).padStart(2, '0')}.${String(now.getUTCMonth() + 1).padStart(2, '0')}.${now.getUTCFullYear()} ${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}`;
+      document.getElementById('utcDateTime').value = formatted;
+    }
+
+    // Initialize
+    setCurrentUTC();
+    loadConfig();
+  </script>
+</body>
+</html>
