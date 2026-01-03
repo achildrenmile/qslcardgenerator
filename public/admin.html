@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,7 +52,7 @@
       color: white;
     }
 
-    .callsign-item {
+    .callsign-item, .user-item {
       background: #0f0f23;
       border-radius: 8px;
       padding: 15px;
@@ -62,12 +62,12 @@
       align-items: center;
     }
 
-    .callsign-item h4 {
+    .callsign-item h4, .user-item h4 {
       margin: 0;
       color: var(--accent);
     }
 
-    .callsign-item p {
+    .callsign-item p, .user-item p {
       margin: 0;
       color: var(--text-muted);
       font-size: 0.85rem;
@@ -108,39 +108,65 @@
     .nav-pills .nav-link.active {
       background: var(--accent);
     }
+
+    .badge-admin {
+      background: var(--accent);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+
+    .user-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
   <div class="container py-4">
-    <!-- Auth Section -->
+    <!-- Login Section -->
     <div id="authSection" class="auth-container">
       <div class="card-container">
         <h3 class="mb-4">Admin Login</h3>
         <div class="mb-3">
-          <label class="form-label">Admin Token</label>
-          <input type="password" class="form-control" id="adminToken" placeholder="Enter admin token">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="loginUsername" placeholder="Enter username">
         </div>
-        <button class="btn btn-accent w-100" onclick="authenticate()">Login</button>
-        <div id="authError" class="text-danger mt-2" style="display:none;">Invalid token</div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn btn-accent w-100" onclick="login()">Login</button>
+        <div id="authError" class="text-danger mt-2" style="display:none;"></div>
       </div>
     </div>
 
     <!-- Admin Section -->
     <div id="adminSection" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>QSL Card Admin</h2>
-        <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+        <div>
+          <h2>QSL Card Admin</h2>
+          <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
+        </div>
+        <div>
+          <button class="btn btn-outline-secondary btn-sm me-2" onclick="showChangePassword()">Change Password</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+        </div>
       </div>
 
-      <ul class="nav nav-pills mb-4" role="tablist">
+      <ul class="nav nav-pills mb-4" role="tablist" id="mainTabs">
         <li class="nav-item">
           <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#callsignsTab">Callsigns</button>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" id="addTabNav">
           <button class="nav-link" data-bs-toggle="pill" data-bs-target="#addTab">Add New</button>
         </li>
         <li class="nav-item">
           <button class="nav-link" data-bs-toggle="pill" data-bs-target="#manageTab">Manage</button>
+        </li>
+        <li class="nav-item" id="usersTabNav" style="display:none;">
+          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#usersTab">Users</button>
         </li>
       </ul>
 
@@ -153,7 +179,7 @@
           </div>
         </div>
 
-        <!-- Add New Tab -->
+        <!-- Add New Tab (Admin only) -->
         <div class="tab-pane fade" id="addTab">
           <div class="card-container">
             <h4 class="mb-3">Add New Callsign</h4>
@@ -184,7 +210,7 @@
           <div class="card-container">
             <h4 class="mb-3">Manage Callsign</h4>
 
-            <div class="mb-3">
+            <div class="mb-3" id="manageSelectContainer">
               <label class="form-label">Select Callsign</label>
               <select class="form-select" id="manageSelect" onchange="loadCallsignDetails()">
                 <option value="">-- Select --</option>
@@ -219,11 +245,83 @@
                 <button class="btn btn-accent btn-sm mt-2" onclick="savePositions()">Save Positions</button>
               </div>
 
-              <!-- Delete -->
-              <div class="mt-4 pt-4 border-top border-secondary">
+              <!-- Delete (Admin only) -->
+              <div class="mt-4 pt-4 border-top border-secondary" id="deleteSection">
                 <button class="btn btn-outline-danger btn-sm" onclick="deleteCallsign()">Delete Callsign</button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Users Tab (Admin only) -->
+        <div class="tab-pane fade" id="usersTab">
+          <div class="card-container">
+            <h4 class="mb-3">User Management</h4>
+            <div id="usersAlert"></div>
+
+            <div class="mb-4">
+              <h5>Add New User</h5>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Username</label>
+                  <input type="text" class="form-control" id="newUsername" placeholder="username">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Password</label>
+                  <input type="password" class="form-control" id="newUserPassword" placeholder="min 8 chars">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Callsign (optional)</label>
+                  <select class="form-select" id="newUserCallsign">
+                    <option value="">-- None --</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="newUserAdmin">
+                    <label class="form-check-label">Admin privileges</label>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <button class="btn btn-accent" onclick="createUser()">Create User</button>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <h5 class="mb-3">Existing Users</h5>
+            <div id="usersList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); color: var(--text);">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title">Change Password</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="passwordAlert"></div>
+            <div class="mb-3">
+              <label class="form-label">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-control" id="newPassword" placeholder="min 8 chars">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" id="confirmPassword">
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-accent" onclick="changePassword()">Change Password</button>
           </div>
         </div>
       </div>
@@ -232,49 +330,118 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    let token = localStorage.getItem('adminToken') || '';
+    let token = localStorage.getItem('authToken') || '';
+    let currentUser = null;
     let callsigns = [];
+    let passwordModal;
 
-    // Authentication
-    async function authenticate() {
-      token = document.getElementById('adminToken').value;
-
-      try {
-        const response = await fetch('/api/callsigns', {
-          headers: { 'X-Admin-Token': token }
-        });
-
-        if (response.ok) {
-          localStorage.setItem('adminToken', token);
-          showAdmin();
-        } else {
-          document.getElementById('authError').style.display = 'block';
-        }
-      } catch (e) {
-        document.getElementById('authError').style.display = 'block';
+    document.addEventListener('DOMContentLoaded', () => {
+      passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+      if (token) {
+        checkAuth();
       }
-    }
+    });
 
-    function logout() {
-      localStorage.removeItem('adminToken');
-      token = '';
-      document.getElementById('adminSection').style.display = 'none';
-      document.getElementById('authSection').style.display = 'block';
-    }
-
-    function showAdmin() {
-      document.getElementById('authSection').style.display = 'none';
-      document.getElementById('adminSection').style.display = 'block';
-      loadCallsigns();
-    }
-
-    // API calls with auth
+    // API calls with Bearer token
     async function apiCall(url, options = {}) {
       options.headers = {
         ...options.headers,
-        'X-Admin-Token': token
+        'Authorization': `Bearer ${token}`
       };
-      return fetch(url, options);
+      const response = await fetch(url, options);
+      if (response.status === 401) {
+        logout();
+        throw new Error('Session expired');
+      }
+      return response;
+    }
+
+    // Login
+    async function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!username || !password) {
+        showAuthError('Please enter username and password');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          token = data.token;
+          currentUser = data.user;
+          localStorage.setItem('authToken', token);
+          showAdmin();
+        } else {
+          showAuthError(data.error || 'Login failed');
+        }
+      } catch (e) {
+        showAuthError('Connection error');
+      }
+    }
+
+    // Check if token is still valid
+    async function checkAuth() {
+      try {
+        const response = await apiCall('/api/auth/me');
+        if (response.ok) {
+          currentUser = await response.json();
+          showAdmin();
+        } else {
+          logout();
+        }
+      } catch (e) {
+        logout();
+      }
+    }
+
+    // Logout
+    async function logout() {
+      try {
+        await apiCall('/api/auth/logout', { method: 'POST' });
+      } catch (e) {}
+      localStorage.removeItem('authToken');
+      token = '';
+      currentUser = null;
+      document.getElementById('adminSection').style.display = 'none';
+      document.getElementById('authSection').style.display = 'block';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function showAuthError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // Show admin panel
+    function showAdmin() {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('adminSection').style.display = 'block';
+      document.getElementById('currentUser').textContent = currentUser.username + (currentUser.isAdmin ? ' (Admin)' : '');
+
+      // Show/hide admin-only features
+      const isAdmin = currentUser.isAdmin;
+      document.getElementById('addTabNav').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('usersTabNav').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('deleteSection').style.display = isAdmin ? 'block' : 'none';
+
+      // For non-admins, only show their callsign in manage dropdown
+      if (!isAdmin && currentUser.callsign) {
+        document.getElementById('manageSelectContainer').style.display = 'none';
+      }
+
+      loadCallsigns();
+      if (isAdmin) {
+        loadUsers();
+      }
     }
 
     // Load callsigns
@@ -299,12 +466,133 @@
           `).join('');
         }
 
-        // Update select
+        // Update manage select
         const select = document.getElementById('manageSelect');
-        select.innerHTML = '<option value="">-- Select --</option>' +
-          callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()} - ${cs.name}</option>`).join('');
+        if (currentUser.isAdmin) {
+          select.innerHTML = '<option value="">-- Select --</option>' +
+            callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()} - ${cs.name}</option>`).join('');
+        } else if (currentUser.callsign) {
+          // Non-admin can only manage their own callsign
+          select.innerHTML = `<option value="${currentUser.callsign}">${currentUser.callsign.toUpperCase()}</option>`;
+          loadCallsignDetails();
+        }
+
+        // Update user callsign select
+        const userCsSelect = document.getElementById('newUserCallsign');
+        if (userCsSelect) {
+          userCsSelect.innerHTML = '<option value="">-- None --</option>' +
+            callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()}</option>`).join('');
+        }
       } catch (e) {
         console.error('Failed to load callsigns:', e);
+      }
+    }
+
+    // Load users (admin only)
+    async function loadUsers() {
+      try {
+        const response = await apiCall('/api/admin/users');
+        const users = await response.json();
+
+        const list = document.getElementById('usersList');
+        list.innerHTML = users.map(u => `
+          <div class="user-item">
+            <div>
+              <h4>${u.username}${u.isAdmin ? '<span class="badge-admin">Admin</span>' : ''}</h4>
+              <p>Callsign: ${u.callsign?.toUpperCase() || 'None'} | Last login: ${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</p>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-outline-light me-1" onclick="resetUserPassword(${u.id}, '${u.username}')">Reset Password</button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load users:', e);
+      }
+    }
+
+    // Create user
+    async function createUser() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newUserPassword').value;
+      const callsign = document.getElementById('newUserCallsign').value || null;
+      const isAdmin = document.getElementById('newUserAdmin').checked;
+
+      if (!username || !password) {
+        showAlert('usersAlert', 'Username and password required', 'danger');
+        return;
+      }
+
+      try {
+        const response = await apiCall('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, callsign, isAdmin })
+        });
+
+        if (response.ok) {
+          showAlert('usersAlert', 'User created successfully', 'success');
+          document.getElementById('newUsername').value = '';
+          document.getElementById('newUserPassword').value = '';
+          document.getElementById('newUserCallsign').value = '';
+          document.getElementById('newUserAdmin').checked = false;
+          loadUsers();
+        } else {
+          const err = await response.json();
+          showAlert('usersAlert', err.error || 'Failed to create user', 'danger');
+        }
+      } catch (e) {
+        showAlert('usersAlert', 'Request failed', 'danger');
+      }
+    }
+
+    // Reset user password
+    async function resetUserPassword(userId, username) {
+      const newPassword = prompt(`Enter new password for ${username} (min 8 chars):`);
+      if (!newPassword) return;
+
+      if (newPassword.length < 8) {
+        alert('Password must be at least 8 characters');
+        return;
+      }
+
+      try {
+        const response = await apiCall(`/api/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPassword })
+        });
+
+        if (response.ok) {
+          showAlert('usersAlert', 'Password reset successfully', 'success');
+        } else {
+          const err = await response.json();
+          showAlert('usersAlert', err.error || 'Failed to reset password', 'danger');
+        }
+      } catch (e) {
+        showAlert('usersAlert', 'Request failed', 'danger');
+      }
+    }
+
+    // Delete user
+    async function deleteUser(userId, username) {
+      if (!confirm(`Delete user ${username}? This cannot be undone.`)) return;
+
+      try {
+        const response = await apiCall(`/api/admin/users/${userId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showAlert('usersAlert', 'User deleted', 'success');
+          loadUsers();
+        } else {
+          const err = await response.json();
+          showAlert('usersAlert', err.error || 'Failed to delete user', 'danger');
+        }
+      } catch (e) {
+        showAlert('usersAlert', 'Request failed', 'danger');
       }
     }
 
@@ -352,9 +640,17 @@
       }
 
       try {
+        // Use protected endpoints - admins use admin API, users use manage API
+        const configUrl = currentUser.isAdmin
+          ? `/api/callsigns/${callsign}`
+          : '/api/manage/callsign';
+        const bgUrl = currentUser.isAdmin
+          ? `/api/callsigns/${callsign}/backgrounds`
+          : '/api/manage/backgrounds';
+
         const [configRes, bgRes] = await Promise.all([
-          fetch(`/api/callsigns/${callsign}`),
-          fetch(`/api/callsigns/${callsign}/backgrounds`)
+          apiCall(configUrl),
+          apiCall(bgUrl)
         ]);
 
         const config = await configRes.json();
@@ -408,8 +704,12 @@
       const formData = new FormData();
       formData.append('file', file);
 
+      const endpoint = currentUser.isAdmin
+        ? `/api/admin/callsigns/${callsign}/upload/card`
+        : '/api/manage/upload/card';
+
       try {
-        const response = await apiCall(`/api/admin/callsigns/${callsign}/upload/card`, {
+        const response = await apiCall(endpoint, {
           method: 'POST',
           body: formData
         });
@@ -435,13 +735,17 @@
         return;
       }
 
+      const endpoint = currentUser.isAdmin
+        ? `/api/admin/callsigns/${callsign}/upload/background`
+        : '/api/manage/upload/background';
+
       let success = 0;
       for (const file of files) {
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-          const response = await apiCall(`/api/admin/callsigns/${callsign}/upload/background`, {
+          const response = await apiCall(endpoint, {
             method: 'POST',
             body: formData
           });
@@ -458,8 +762,12 @@
     async function deleteBackground(callsign, filename) {
       if (!confirm(`Delete ${filename}?`)) return;
 
+      const endpoint = currentUser.isAdmin
+        ? `/api/admin/callsigns/${callsign}/backgrounds/${filename}`
+        : `/api/manage/backgrounds/${filename}`;
+
       try {
-        const response = await apiCall(`/api/admin/callsigns/${callsign}/backgrounds/${filename}`, {
+        const response = await apiCall(endpoint, {
           method: 'DELETE'
         });
 
@@ -484,8 +792,12 @@
         };
       });
 
+      const endpoint = currentUser.isAdmin
+        ? `/api/admin/callsigns/${callsign}`
+        : '/api/manage/callsign';
+
       try {
-        const response = await apiCall(`/api/admin/callsigns/${callsign}`, {
+        const response = await apiCall(endpoint, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ textPositions })
@@ -522,17 +834,61 @@
       }
     }
 
+    // Change password modal
+    function showChangePassword() {
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+      document.getElementById('passwordAlert').innerHTML = '';
+      passwordModal.show();
+    }
+
+    async function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (!currentPassword || !newPassword) {
+        showAlert('passwordAlert', 'Please fill all fields', 'danger');
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        showAlert('passwordAlert', 'New password must be at least 8 characters', 'danger');
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        showAlert('passwordAlert', 'Passwords do not match', 'danger');
+        return;
+      }
+
+      try {
+        const response = await apiCall('/api/auth/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        if (response.ok) {
+          showAlert('passwordAlert', 'Password changed successfully!', 'success');
+          setTimeout(() => passwordModal.hide(), 1500);
+        } else {
+          const err = await response.json();
+          showAlert('passwordAlert', err.error || 'Failed to change password', 'danger');
+        }
+      } catch (e) {
+        showAlert('passwordAlert', 'Request failed', 'danger');
+      }
+    }
+
     // Show alert
     function showAlert(id, message, type) {
       document.getElementById(id).innerHTML = `<div class="alert alert-${type} py-2">${message}</div>`;
       setTimeout(() => {
-        document.getElementById(id).innerHTML = '';
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
       }, 3000);
-    }
-
-    // Check if already authenticated
-    if (token) {
-      showAdmin();
     }
   </script>
 </body>

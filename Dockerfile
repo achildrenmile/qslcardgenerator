@@ -11,16 +11,10 @@ RUN npm ci --only=production
 # Copy source files
 COPY src ./src
 COPY public ./public
+COPY scripts ./scripts
 
 # Create data directory
 RUN mkdir -p /app/data/cards
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S qslgen -u 1001 -G nodejs && \
-    chown -R qslgen:nodejs /app
-
-USER qslgen
 
 EXPOSE 3400
 

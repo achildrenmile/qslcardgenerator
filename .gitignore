@@ -5,3 +5,8 @@ node_modules/
 # Keep data structure but not content
 data/cards/*
 !data/cards/.gitkeep
+
+# SQLite database (contains user passwords)
+data/*.db
+data/*.db-wal
+data/*.db-shm
