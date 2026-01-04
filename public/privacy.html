@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - QSL Card Generator</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #475569;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+
+    .navbar-content {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .navbar-logo {
+      width: 32px;
+      height: 32px;
+      color: var(--accent);
+    }
+
+    .navbar-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .last-updated {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 32px 0 16px;
+      color: var(--accent);
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 24px 0 12px;
+      color: var(--text-primary);
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .info-block {
+      margin-bottom: 8px;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .info-value {
+      color: var(--text-primary);
+    }
+
+    ul {
+      margin: 16px 0;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .highlight {
+      background: var(--bg-card);
+      border-left: 3px solid var(--accent);
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+
+    .highlight p {
+      margin-bottom: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    th {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 16px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      table {
+        font-size: 0.875rem;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="navbar-brand">
+        <svg class="navbar-logo" viewBox="0 0 120 120" fill="none">
+          <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+        </svg>
+        <span class="navbar-title">QSL Card Generator</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Privacy Policy (Datenschutzerklärung)</h1>
+    <p class="last-updated">Last updated: January 2026</p>
+
+    <div class="card">
+      <h2 style="margin-top: 0;">Data Controller</h2>
+      <div class="info-block">
+        <div class="info-label">Name</div>
+        <div class="info-value">Ing. Michael Linder, MSc. (OE8YML)</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Address</div>
+        <div class="info-value">Nötsch 219, 9611 Nötsch im Gailtal, Austria</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Email</div>
+        <div class="info-value"><a href="mailto:oe8yml@oevsv.at">oe8yml@oevsv.at</a></div>
+      </div>
+    </div>
+
+    <h2>Overview</h2>
+    <p>
+      We take the protection of your personal data very seriously. This privacy policy explains what data we collect,
+      how we use it, and your rights regarding your data under the General Data Protection Regulation (GDPR).
+    </p>
+
+    <h2>Data We Collect</h2>
+
+    <h3>1. Account Data</h3>
+    <p>When you create an account, we collect:</p>
+    <ul>
+      <li><strong>Username</strong> - Your chosen login name</li>
+      <li><strong>Password</strong> - Stored securely using bcrypt hashing (we never store plain passwords)</li>
+      <li><strong>Callsign</strong> - Your amateur radio callsign (if assigned)</li>
+    </ul>
+
+    <h3>2. QSL Card Data</h3>
+    <p>When you generate QSL cards, we process:</p>
+    <ul>
+      <li>Card templates and background images you upload</li>
+      <li>Text positions and configuration settings</li>
+      <li>Generated card data (processed in your browser, not stored on our servers)</li>
+    </ul>
+
+    <div class="highlight">
+      <p><strong>Note:</strong> QSL cards are generated entirely in your browser using HTML5 Canvas.
+      The actual card content (recipient callsign, date, frequency, etc.) is not transmitted to or stored on our servers.</p>
+    </div>
+
+    <h3>3. Automatically Collected Data</h3>
+    <p>When you visit our website, the following data may be collected automatically:</p>
+    <ul>
+      <li>IP address (may be anonymized by Cloudflare)</li>
+      <li>Date and time of access</li>
+      <li>Browser type and version</li>
+      <li>Operating system</li>
+      <li>Referrer URL (the page you came from)</li>
+    </ul>
+
+    <h2>Cloudflare CDN and Security</h2>
+
+    <div class="highlight">
+      <p><strong>Important:</strong> This website uses Cloudflare as a Content Delivery Network (CDN) and security service.</p>
+    </div>
+
+    <p>
+      Cloudflare, Inc. is a US-based company that provides CDN, DDoS protection, and security services.
+      When you access our website, your connection passes through Cloudflare's network.
+    </p>
+
+    <h3>Data processed by Cloudflare:</h3>
+    <ul>
+      <li>IP addresses (for routing and security)</li>
+      <li>HTTP request data (headers, URLs)</li>
+      <li>Security-related information (to detect and prevent attacks)</li>
+    </ul>
+
+    <h3>Cloudflare's role:</h3>
+    <table>
+      <tr>
+        <th>Purpose</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>CDN</td>
+        <td>Caches and delivers static content from servers closer to you</td>
+      </tr>
+      <tr>
+        <td>DDoS Protection</td>
+        <td>Protects our service from distributed denial-of-service attacks</td>
+      </tr>
+      <tr>
+        <td>SSL/TLS</td>
+        <td>Encrypts data in transit between you and our servers</td>
+      </tr>
+      <tr>
+        <td>Security</td>
+        <td>Blocks malicious traffic and bot attacks</td>
+      </tr>
+    </table>
+
+    <p>
+      Cloudflare processes data according to their privacy policy:
+      <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">https://www.cloudflare.com/privacypolicy/</a>
+    </p>
+    <p>
+      Cloudflare is certified under the EU-U.S. Data Privacy Framework.
+    </p>
+
+    <h2>Legal Basis for Processing</h2>
+    <p>We process your data based on:</p>
+    <ul>
+      <li><strong>Contract performance (Art. 6(1)(b) GDPR)</strong> - To provide our QSL card generation service</li>
+      <li><strong>Legitimate interests (Art. 6(1)(f) GDPR)</strong> - For security, fraud prevention, and service improvement</li>
+      <li><strong>Consent (Art. 6(1)(a) GDPR)</strong> - Where you have explicitly agreed</li>
+    </ul>
+
+    <h2>Cookies and Tracking</h2>
+    <p>
+      This website uses only essential cookies required for the service to function:
+    </p>
+    <ul>
+      <li><strong>Authentication token</strong> - Stored in localStorage to keep you logged in</li>
+    </ul>
+    <p>
+      We do <strong>not</strong> use:
+    </p>
+    <ul>
+      <li>Tracking cookies</li>
+      <li>Advertising cookies</li>
+      <li>Third-party analytics (Google Analytics, etc.)</li>
+    </ul>
+
+    <h2>Data Retention</h2>
+    <table>
+      <tr>
+        <th>Data Type</th>
+        <th>Retention Period</th>
+      </tr>
+      <tr>
+        <td>Account data</td>
+        <td>Until you request deletion</td>
+      </tr>
+      <tr>
+        <td>Session data</td>
+        <td>7 days (automatic expiration)</td>
+      </tr>
+      <tr>
+        <td>Uploaded images</td>
+        <td>Until you delete them or your account is removed</td>
+      </tr>
+      <tr>
+        <td>Audit logs</td>
+        <td>90 days for security purposes</td>
+      </tr>
+    </table>
+
+    <h2>Your Rights Under GDPR</h2>
+    <p>You have the following rights regarding your personal data:</p>
+    <ul>
+      <li><strong>Right of access (Art. 15)</strong> - Request a copy of your data</li>
+      <li><strong>Right to rectification (Art. 16)</strong> - Correct inaccurate data</li>
+      <li><strong>Right to erasure (Art. 17)</strong> - Request deletion of your data ("right to be forgotten")</li>
+      <li><strong>Right to restriction (Art. 18)</strong> - Limit how we process your data</li>
+      <li><strong>Right to data portability (Art. 20)</strong> - Receive your data in a portable format</li>
+      <li><strong>Right to object (Art. 21)</strong> - Object to processing based on legitimate interests</li>
+    </ul>
+    <p>
+      To exercise these rights, please contact us at <a href="mailto:oe8yml@oevsv.at">oe8yml@oevsv.at</a>.
+    </p>
+
+    <h2>Data Security</h2>
+    <p>We implement appropriate technical and organizational measures to protect your data:</p>
+    <ul>
+      <li>Passwords are hashed using bcrypt with 12 salt rounds</li>
+      <li>All data is transmitted over HTTPS/TLS encryption</li>
+      <li>Session tokens are cryptographically random</li>
+      <li>Rate limiting prevents brute-force attacks</li>
+      <li>Card images are only accessible to authenticated users</li>
+    </ul>
+
+    <h2>International Data Transfers</h2>
+    <p>
+      Your data may be transferred to and processed in countries outside the European Economic Area (EEA)
+      through our use of Cloudflare. Cloudflare participates in the EU-U.S. Data Privacy Framework,
+      which provides adequate protection for personal data transferred from the EU to the US.
+    </p>
+
+    <h2>Complaints</h2>
+    <p>
+      If you believe that your data protection rights have been violated, you have the right to lodge
+      a complaint with a supervisory authority. In Austria, the competent authority is:
+    </p>
+    <div class="card">
+      <div class="info-value">
+        <strong>Österreichische Datenschutzbehörde</strong><br>
+        Barichgasse 40-42<br>
+        1030 Vienna, Austria<br>
+        <a href="mailto:dsb@dsb.gv.at">dsb@dsb.gv.at</a><br>
+        <a href="https://www.dsb.gv.at" target="_blank" rel="noopener">https://www.dsb.gv.at</a>
+      </div>
+    </div>
+
+    <h2>Changes to This Policy</h2>
+    <p>
+      We may update this privacy policy from time to time. The latest version will always be available
+      on this page with the "Last updated" date at the top. Significant changes will be communicated
+      to registered users.
+    </p>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/imprint.html">Imprint</a>
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+    <p class="copyright">QSL Card Generator for Amateur Radio Operators</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imprint - QSL Card Generator</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #475569;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+
+    .navbar-content {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .navbar-logo {
+      width: 32px;
+      height: 32px;
+      color: var(--accent);
+    }
+
+    .navbar-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      color: var(--text-primary);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 32px 0 16px;
+      color: var(--accent);
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .info-block {
+      margin-bottom: 8px;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .info-value {
+      color: var(--text-primary);
+    }
+
+    ul {
+      margin: 16px 0;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .copyright {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 16px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="/" class="navbar-brand">
+        <svg class="navbar-logo" viewBox="0 0 120 120" fill="none">
+          <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+        </svg>
+        <span class="navbar-title">QSL Card Generator</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h1>Imprint (Impressum)</h1>
+
+    <div class="card">
+      <h2 style="margin-top: 0;">Site Operator</h2>
+      <div class="info-block">
+        <div class="info-label">Name</div>
+        <div class="info-value">Ing. Michael Linder, MSc.</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Callsign</div>
+        <div class="info-value">OE8YML</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Address</div>
+        <div class="info-value">Nötsch 219<br>9611 Nötsch im Gailtal<br>Austria</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Email</div>
+        <div class="info-value"><a href="mailto:oe8yml@oevsv.at">oe8yml@oevsv.at</a></div>
+      </div>
+    </div>
+
+    <h2>Legal References</h2>
+    <p>Information according to:</p>
+    <ul>
+      <li>Austrian E-Commerce Act (ECG) § 5</li>
+      <li>Austrian Media Act (MedienG) § 25</li>
+    </ul>
+
+    <h2>Online Dispute Resolution</h2>
+    <p>
+      The European Commission provides a platform for online dispute resolution (ODR):
+      <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener">https://ec.europa.eu/consumers/odr/</a>
+    </p>
+    <p>
+      We are not obligated or willing to participate in dispute resolution proceedings before a consumer arbitration board.
+    </p>
+
+    <h2>Copyright</h2>
+    <p>
+      The content and works on these pages created by the site operators are subject to Austrian copyright law.
+      Duplication, processing, distribution, and any kind of use outside the limits of copyright law require
+      the written consent of the respective author or creator.
+    </p>
+    <p>
+      The QSL cards generated by users remain the intellectual property of the respective callsign owners.
+    </p>
+
+    <h2>Liability for Links</h2>
+    <p>
+      Our website may contain links to external websites of third parties, over whose content we have no influence.
+      Therefore, we cannot accept any liability for this external content. The respective provider or operator
+      of the linked pages is always responsible for the content of those pages.
+    </p>
+    <p>
+      The linked pages were checked for possible legal violations at the time of linking.
+      No illegal content was recognizable at the time of linking. However, permanent content control of the
+      linked pages is not reasonable without concrete indications of a legal violation.
+    </p>
+
+    <h2>Third-Party Content</h2>
+    <p>
+      If you believe that any content on this website infringes your copyright or other rights,
+      please contact us at the email address provided above. We will investigate and remove any
+      infringing content promptly upon verification.
+    </p>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/imprint.html">Imprint</a>
+      <a href="/privacy.html">Privacy Policy</a>
+    </div>
+    <p class="copyright">QSL Card Generator for Amateur Radio Operators</p>
+  </footer>
+</body>
+</html>

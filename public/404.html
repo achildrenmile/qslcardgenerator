@@ -1,32 +1,126 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Callsign Not Found - QSL Card Generator</title>
+  <title>Not Found - QSL Card Generator</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --accent: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #475569;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: #1a1a2e;
-      color: #eee;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
       text-align: center;
+      padding: 20px;
     }
-    h1 { font-size: 4rem; color: #e94560; margin: 0; }
-    p { color: #aaa; margin: 20px 0; }
-    a { color: #e94560; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      color: var(--accent);
+      margin-bottom: 32px;
+      opacity: 0.5;
+    }
+
+    h1 {
+      font-size: 6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .message {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .back-link:hover {
+      background: var(--border);
+      text-decoration: none;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 24px;
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer a {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .footer a:hover {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
-  <div>
-    <h1>404</h1>
-    <p>Callsign not found</p>
-    <a href="/">Back to Home</a>
+  <svg class="logo" viewBox="0 0 120 120" fill="none">
+    <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+    <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+    <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+    <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+    <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+    <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+  </svg>
+  <h1>404</h1>
+  <p class="message">Page not found</p>
+  <a href="/" class="back-link">Back to Home</a>
+
+  <div class="footer">
+    <a href="/imprint.html">Imprint</a>
+    <a href="/privacy.html">Privacy Policy</a>
   </div>
 </body>
 </html>
