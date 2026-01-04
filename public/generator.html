@@ -104,6 +104,34 @@
       to { transform: rotate(360deg); }
     }
 
+    .auth-container {
+      max-width: 400px;
+      margin: 100px auto;
+    }
+
+    .user-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+    }
+
+    .user-bar .user-info {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .access-denied {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .access-denied h2 {
+      color: var(--accent);
+    }
+
     @media (max-width: 768px) {
       .container { padding: 10px; }
       .card-container { padding: 15px; }
@@ -112,12 +140,51 @@
 </head>
 <body>
   <div class="container py-4">
+    <!-- Loading -->
     <div id="loading" class="loading">
       <div class="loading-spinner mx-auto mb-3"></div>
       <p>Loading...</p>
     </div>
 
+    <!-- Login Section -->
+    <div id="authSection" class="auth-container" style="display: none;">
+      <div class="card-container">
+        <h3 class="mb-4">Login Required</h3>
+        <p class="text-muted mb-4">Please login to access the QSL Card Generator.</p>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="loginUsername" placeholder="Enter username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn btn-primary w-100" onclick="login()">Login</button>
+        <div id="authError" class="text-danger mt-2" style="display:none;"></div>
+        <div class="text-center mt-3">
+          <a href="/" class="text-muted">Back to Home</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Access Denied Section -->
+    <div id="accessDenied" class="access-denied" style="display: none;">
+      <div class="card-container">
+        <h2>Access Denied</h2>
+        <p class="text-muted">You can only generate QSL cards for your own callsign.</p>
+        <p id="deniedMessage"></p>
+        <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+        <button class="btn btn-outline-secondary mt-3 ms-2" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Generator Content -->
     <div id="content" style="display: none;">
+      <div class="user-bar">
+        <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
+        <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+
       <div class="header-info mb-4">
         <h1 id="stationName">QSL Card Generator</h1>
         <a id="qrzLink" href="#" target="_blank"></a>
@@ -196,6 +263,8 @@ Best regards</textarea>
     const pathParts = window.location.pathname.split('/').filter(Boolean);
     const CALLSIGN = pathParts[0] || '';
 
+    let token = localStorage.getItem('authToken') || '';
+    let currentUser = null;
     let config = null;
     let positions = null;
     const SCALE_FACTOR = 0.4;
@@ -205,37 +274,136 @@ Best regards</textarea>
     const cardImage = new Image();
     const backgroundImage = new Image();
 
-    // Load callsign configuration
-    async function loadConfig() {
+    // API call helper with auth
+    async function apiCall(url, options = {}) {
+      options.headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+      };
+      return fetch(url, options);
+    }
+
+    // Check authentication and access
+    async function checkAccess() {
+      if (!token) {
+        showLogin();
+        return;
+      }
+
       try {
-        const response = await fetch(`/api/callsigns/${CALLSIGN}`);
-        if (!response.ok) {
+        // Verify token is still valid
+        const meResponse = await apiCall('/api/auth/me');
+        if (!meResponse.ok) {
+          token = '';
+          localStorage.removeItem('authToken');
+          showLogin();
+          return;
+        }
+
+        currentUser = await meResponse.json();
+
+        // Check access to this callsign
+        const accessResponse = await apiCall(`/api/generator/${CALLSIGN}/access`);
+        if (accessResponse.status === 403) {
+          showAccessDenied();
+          return;
+        }
+
+        if (!accessResponse.ok) {
           window.location.href = '/';
           return;
         }
-        config = await response.json();
+
+        config = await accessResponse.json();
         positions = config.textPositions;
 
-        document.getElementById('stationName').textContent = config.name;
-        document.getElementById('qrzLink').href = config.qrzLink;
-        document.getElementById('qrzLink').textContent = config.id.toUpperCase();
-        document.title = `QSL Card - ${config.id.toUpperCase()}`;
-
-        await loadBackgrounds();
-        loadCardImage();
-
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
+        await loadGenerator();
       } catch (error) {
-        console.error('Failed to load config:', error);
-        document.getElementById('loading').innerHTML = '<p class="text-danger">Failed to load configuration</p>';
+        console.error('Access check failed:', error);
+        showLogin();
       }
     }
 
-    // Load backgrounds list
+    function showLogin() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('authSection').style.display = 'block';
+      document.getElementById('content').style.display = 'none';
+      document.getElementById('accessDenied').style.display = 'none';
+    }
+
+    function showAccessDenied() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('content').style.display = 'none';
+      document.getElementById('accessDenied').style.display = 'block';
+      document.getElementById('deniedMessage').textContent =
+        `Your account (${currentUser.username}) is linked to callsign ${currentUser.callsign?.toUpperCase() || 'none'}, not ${CALLSIGN.toUpperCase()}.`;
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!username || !password) {
+        showAuthError('Please enter username and password');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          token = data.token;
+          currentUser = data.user;
+          localStorage.setItem('authToken', token);
+          checkAccess();
+        } else {
+          showAuthError(data.error || 'Login failed');
+        }
+      } catch (e) {
+        showAuthError('Connection error');
+      }
+    }
+
+    function logout() {
+      apiCall('/api/auth/logout', { method: 'POST' }).catch(() => {});
+      localStorage.removeItem('authToken');
+      token = '';
+      currentUser = null;
+      window.location.href = '/';
+    }
+
+    function showAuthError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    async function loadGenerator() {
+      document.getElementById('currentUser').textContent = currentUser.username;
+      document.getElementById('stationName').textContent = config.name;
+      document.getElementById('qrzLink').href = config.qrzLink;
+      document.getElementById('qrzLink').textContent = config.id.toUpperCase();
+      document.title = `QSL Card - ${config.id.toUpperCase()}`;
+
+      await loadBackgrounds();
+      loadCardImage();
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('accessDenied').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+    }
+
+    // Load backgrounds list (protected)
     async function loadBackgrounds() {
       try {
-        const response = await fetch(`/api/callsigns/${CALLSIGN}/backgrounds`);
+        const response = await apiCall(`/api/generator/${CALLSIGN}/backgrounds`);
         const backgrounds = await response.json();
 
         const select = document.getElementById('backgroundSelect');
@@ -372,9 +540,21 @@ Best regards</textarea>
       el.addEventListener('input', drawCanvas);
     });
 
-    // Download button
-    document.getElementById('downloadBtn').addEventListener('click', function() {
+    // Download button with audit logging
+    document.getElementById('downloadBtn').addEventListener('click', async function() {
       const callsignVal = document.getElementById('callsign').value || 'QSL';
+
+      // Log the download
+      try {
+        await apiCall(`/api/generator/${CALLSIGN}/download`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetCallsign: callsignVal.toUpperCase() })
+        });
+      } catch (e) {
+        console.error('Failed to log download:', e);
+      }
+
       const link = document.createElement('a');
       link.download = `${callsignVal.toUpperCase()}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -388,9 +568,14 @@ Best regards</textarea>
       document.getElementById('utcDateTime').value = formatted;
     }
 
+    // Allow Enter key to login
+    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
     // Initialize
     setCurrentUTC();
-    loadConfig();
+    checkAccess();
   </script>
 </body>
 </html>

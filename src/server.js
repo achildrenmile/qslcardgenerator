@@ -53,6 +53,20 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
   CREATE INDEX IF NOT EXISTS idx_users_callsign ON users(callsign);
+
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+    user_id INTEGER,
+    username TEXT,
+    callsign TEXT,
+    action TEXT NOT NULL,
+    details TEXT,
+    ip_address TEXT
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp);
+  CREATE INDEX IF NOT EXISTS idx_audit_callsign ON audit_log(callsign);
 `);
 
 // Security headers
@@ -169,6 +183,19 @@ function cleanExpiredSessions() {
 
 // Clean expired sessions periodically
 setInterval(cleanExpiredSessions, 60 * 60 * 1000); // Every hour
+
+// Audit logging
+function logAudit(req, action, details = null) {
+  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+  const userId = req.user?.user_id || null;
+  const username = req.user?.username || null;
+  const callsign = req.user?.callsign || req.params?.callsign || null;
+
+  db.prepare(`
+    INSERT INTO audit_log (user_id, username, callsign, action, details, ip_address)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(userId, username, callsign, action, details, ip);
+}
 
 // ============================================
 // Authentication middleware
@@ -696,6 +723,88 @@ app.delete('/api/admin/callsigns/:callsign/backgrounds/:filename', requireAuth, 
 });
 
 // ============================================
+// Generator Access API (protected)
+// ============================================
+
+// Verify generator access - returns config if authorized
+app.get('/api/generator/:callsign/access', requireAuth, (req, res) => {
+  const callsign = req.params.callsign.toLowerCase();
+
+  // Check if user owns this callsign or is admin
+  if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
+    logAudit(req, 'generator_access_denied', `Attempted access to ${callsign}`);
+    return res.status(403).json({ error: 'Access denied. You can only generate cards for your own callsign.' });
+  }
+
+  const config = getCallsignConfig(callsign);
+  if (!config) {
+    return res.status(404).json({ error: 'Callsign not found' });
+  }
+
+  logAudit(req, 'generator_access', `Accessed generator for ${callsign}`);
+  res.json(config);
+});
+
+// Get generator backgrounds (protected)
+app.get('/api/generator/:callsign/backgrounds', requireAuth, (req, res) => {
+  const callsign = req.params.callsign.toLowerCase();
+
+  // Check if user owns this callsign or is admin
+  if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const bgDir = path.join(CARDS_DIR, callsign, 'backgrounds');
+  if (!fs.existsSync(bgDir)) {
+    return res.json([]);
+  }
+
+  try {
+    const files = fs.readdirSync(bgDir)
+      .filter(f => /\.(jpg|jpeg|png|gif|webp)$/i.test(f))
+      .map(f => {
+        const name = path.parse(f).name;
+        const displayName = name
+          .replace(/[_-]/g, ' ')
+          .replace(/\d+$/, m => ' ' + m)
+          .split(' ')
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ')
+          .trim();
+        return { filename: f, displayName };
+      })
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    res.json(files);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to list backgrounds' });
+  }
+});
+
+// Log card download
+app.post('/api/generator/:callsign/download', requireAuth, (req, res) => {
+  const callsign = req.params.callsign.toLowerCase();
+  const { targetCallsign } = req.body;
+
+  // Check if user owns this callsign or is admin
+  if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  logAudit(req, 'card_generated', `Generated card for ${targetCallsign || 'unknown'}`);
+  res.json({ success: true });
+});
+
+// Get audit log (admin only)
+app.get('/api/admin/audit', requireAuth, requireAdmin, (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 100, 1000);
+  const logs = db.prepare(`
+    SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?
+  `).all(limit);
+  res.json(logs);
+});
+
+// ============================================
 // Dynamic callsign routes
 // ============================================
 
@@ -703,7 +812,7 @@ app.get('/:callsign', (req, res) => {
   const callsign = req.params.callsign.toLowerCase();
 
   // Skip if it's a known static file
-  if (['admin.html', 'index.html', '404.html'].includes(req.params.callsign)) {
+  if (['admin.html', 'index.html', '404.html', 'generator.html'].includes(req.params.callsign)) {
     return res.sendFile(path.join(__dirname, '../public', req.params.callsign));
   }
 
