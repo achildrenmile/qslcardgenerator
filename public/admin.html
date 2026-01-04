@@ -4,342 +4,832 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - QSL Card Generator</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #1a1a2e;
-      --card-bg: #16213e;
-      --accent: #e94560;
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #475569;
       --success: #22c55e;
-      --text: #eee;
-      --text-muted: #aaa;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      background: var(--bg-color);
-      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       min-height: 100vh;
+      line-height: 1.6;
     }
 
-    .card-container {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
+    /* Header / Navbar */
+    .navbar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .form-control, .form-select {
-      background: #0f0f23;
-      border: 1px solid #333;
-      color: var(--text);
-    }
-
-    .form-control:focus, .form-select:focus {
-      background: #0f0f23;
-      border-color: var(--accent);
-      color: var(--text);
-      box-shadow: 0 0 0 0.2rem rgba(233, 69, 96, 0.25);
-    }
-
-    .btn-accent {
-      background: var(--accent);
-      color: white;
-      border: none;
-    }
-
-    .btn-accent:hover {
-      background: #c73e54;
-      color: white;
-    }
-
-    .callsign-item, .user-item {
-      background: #0f0f23;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
+    .navbar-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
+      gap: 16px;
     }
 
-    .callsign-item h4, .user-item h4 {
-      margin: 0;
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .navbar-logo {
+      width: 36px;
+      height: 36px;
       color: var(--accent);
     }
 
-    .callsign-item p, .user-item p {
-      margin: 0;
-      color: var(--text-muted);
-      font-size: 0.85rem;
+    .navbar-title {
+      font-size: 1.125rem;
+      font-weight: 600;
     }
 
-    .auth-container {
-      max-width: 400px;
-      margin: 100px auto;
-    }
-
-    .bg-item {
-      display: inline-flex;
-      align-items: center;
-      background: #0f0f23;
-      padding: 5px 12px;
-      border-radius: 20px;
-      margin: 3px;
-      font-size: 0.85rem;
-    }
-
-    .bg-item button {
-      background: none;
-      border: none;
+    .navbar-title span {
       color: var(--accent);
-      margin-left: 8px;
-      cursor: pointer;
-      padding: 0;
     }
 
-    .alert {
-      border: none;
-    }
-
-    .nav-pills .nav-link {
-      color: var(--text-muted);
-    }
-
-    .nav-pills .nav-link.active {
-      background: var(--accent);
-    }
-
-    .badge-admin {
-      background: var(--accent);
-      font-size: 0.7rem;
-      padding: 3px 8px;
-      border-radius: 10px;
-      margin-left: 8px;
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .user-info {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .user-info strong {
+      color: var(--text-primary);
+    }
+
+    .admin-badge {
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Auth Container */
+    .auth-container {
+      max-width: 400px;
+      margin: 80px auto;
+      padding: 0 20px;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo {
+      width: 64px;
+      height: 64px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .auth-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .auth-header p {
+      color: var(--text-secondary);
       font-size: 0.9rem;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-input::placeholder {
       color: var(--text-muted);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-check input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .form-check label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-card);
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-secondary);
+      padding: 4px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-card);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* List Items */
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+    }
+
+    .list-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .list-item-info h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .list-item-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .list-item-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Background Tags */
+    .bg-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .bg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    .bg-tag button {
+      background: none;
+      border: none;
+      color: var(--error);
+      cursor: pointer;
+      padding: 0;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .bg-tag button:hover {
+      color: #f87171;
+    }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+    }
+
+    .alert-success {
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .section-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar-content {
+        flex-wrap: wrap;
+      }
+
+      .navbar-user {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+        margin-top: 12px;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .list-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .list-item-actions {
+        width: 100%;
+      }
+
+      .list-item-actions .btn {
+        flex: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container py-4">
-    <!-- Login Section -->
-    <div id="authSection" class="auth-container">
-      <div class="card-container">
-        <h3 class="mb-4">Admin Login</h3>
-        <div class="mb-3">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-control" id="loginUsername" placeholder="Enter username">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-control" id="loginPassword" placeholder="Enter password">
-        </div>
-        <button class="btn btn-accent w-100" onclick="login()">Login</button>
-        <div id="authError" class="text-danger mt-2" style="display:none;"></div>
+  <!-- Auth Section -->
+  <div id="authSection">
+    <div class="auth-container">
+      <div class="auth-header">
+        <svg class="auth-logo" viewBox="0 0 120 120" fill="none">
+          <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+          <line x1="42" y1="84" x2="58" y2="84" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <line x1="42" y1="91" x2="78" y2="91" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+          <line x1="42" y1="98" x2="68" y2="98" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+        <h1>Admin Panel</h1>
+        <p>Sign in to manage QSL cards</p>
+      </div>
+
+      <div class="card">
+        <div id="authError" class="alert alert-error" style="display: none;"></div>
+        <form onsubmit="login(event)">
+          <div class="form-group">
+            <label class="form-label" for="loginUsername">Username</label>
+            <input type="text" class="form-input" id="loginUsername" placeholder="Enter username" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" autocomplete="current-password" required>
+          </div>
+          <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+        </form>
       </div>
     </div>
+  </div>
 
-    <!-- Admin Section -->
-    <div id="adminSection" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2>QSL Card Admin</h2>
-          <span class="user-info">Logged in as: <strong id="currentUser"></strong></span>
+  <!-- Admin Section -->
+  <div id="adminSection" style="display: none;">
+    <nav class="navbar">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <svg class="navbar-logo" viewBox="0 0 120 120" fill="none">
+            <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+            <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+            <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+            <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+            <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+          </svg>
+          <span class="navbar-title">QSL <span>Admin</span></span>
+        </a>
+        <div class="navbar-user">
+          <span class="user-info">
+            <strong id="currentUser"></strong>
+          </span>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline" onclick="showChangePassword()">Change Password</button>
+            <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
+          </div>
         </div>
-        <div>
-          <button class="btn btn-outline-secondary btn-sm me-2" onclick="showChangePassword()">Change Password</button>
-          <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="callsigns">Callsigns</button>
+        <button class="tab-btn" data-tab="add" id="addTabBtn">Add New</button>
+        <button class="tab-btn" data-tab="manage">Manage</button>
+        <button class="tab-btn" data-tab="users" id="usersTabBtn">Users</button>
+      </div>
+
+      <!-- Callsigns Tab -->
+      <div class="tab-content active" id="callsignsTab">
+        <div class="card">
+          <div class="card-header">Registered Callsigns</div>
+          <div id="callsignsList"></div>
         </div>
       </div>
 
-      <ul class="nav nav-pills mb-4" role="tablist" id="mainTabs">
-        <li class="nav-item">
-          <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#callsignsTab">Callsigns</button>
-        </li>
-        <li class="nav-item" id="addTabNav">
-          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#addTab">Add New</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#manageTab">Manage</button>
-        </li>
-        <li class="nav-item" id="usersTabNav" style="display:none;">
-          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#usersTab">Users</button>
-        </li>
-      </ul>
-
-      <div class="tab-content">
-        <!-- Callsigns List Tab -->
-        <div class="tab-pane fade show active" id="callsignsTab">
-          <div class="card-container">
-            <h4 class="mb-3">Registered Callsigns</h4>
-            <div id="callsignsList"></div>
+      <!-- Add New Tab -->
+      <div class="tab-content" id="addTab">
+        <div class="card">
+          <div class="card-header">Add New Callsign</div>
+          <div id="addAlert"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Callsign ID</label>
+              <input type="text" class="form-input" id="newId" placeholder="e.g., oe8yml">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Display Name</label>
+              <input type="text" class="form-input" id="newName" placeholder="e.g., OE8YML Station">
+            </div>
           </div>
+          <div class="form-group">
+            <label class="form-label">QRZ Link (optional)</label>
+            <input type="text" class="form-input" id="newQrzLink" placeholder="https://www.qrz.com/db/OE8YML">
+          </div>
+          <button class="btn" onclick="createCallsign()">Create Callsign</button>
         </div>
+      </div>
 
-        <!-- Add New Tab (Admin only) -->
-        <div class="tab-pane fade" id="addTab">
-          <div class="card-container">
-            <h4 class="mb-3">Add New Callsign</h4>
-            <div id="addAlert"></div>
+      <!-- Manage Tab -->
+      <div class="tab-content" id="manageTab">
+        <div class="card">
+          <div class="card-header">Manage Callsign</div>
 
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Callsign ID</label>
-                <input type="text" class="form-control" id="newId" placeholder="e.g., oe8yml">
+          <div class="form-group" id="manageSelectContainer">
+            <label class="form-label">Select Callsign</label>
+            <select class="form-select" id="manageSelect" onchange="loadCallsignDetails()">
+              <option value="">-- Select --</option>
+            </select>
+          </div>
+
+          <div id="manageDetails" style="display: none;">
+            <div class="divider"></div>
+            <div id="manageAlert"></div>
+
+            <!-- Card Upload -->
+            <div class="section-header">
+              <div>
+                <h4 class="section-title">Card Template</h4>
+                <p class="section-subtitle">Upload card.png (4837 x 3078 px recommended)</p>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">Display Name</label>
-                <input type="text" class="form-control" id="newName" placeholder="e.g., OE8YML Station">
+            </div>
+            <div class="form-group">
+              <input type="file" class="form-input" id="cardUpload" accept="image/png">
+            </div>
+            <button class="btn btn-sm" onclick="uploadCard()">Upload Card</button>
+
+            <div class="divider"></div>
+
+            <!-- Backgrounds -->
+            <div class="section-header">
+              <h4 class="section-title">Backgrounds</h4>
+            </div>
+            <div class="bg-tags" id="backgroundsList"></div>
+            <div class="form-group">
+              <input type="file" class="form-input" id="bgUpload" accept="image/*" multiple>
+            </div>
+            <button class="btn btn-sm" onclick="uploadBackgrounds()">Upload Backgrounds</button>
+
+            <div class="divider"></div>
+
+            <!-- Text Positions -->
+            <div class="section-header">
+              <div>
+                <h4 class="section-title">Text Positions</h4>
+                <p class="section-subtitle">Customize where text appears on the card (in pixels)</p>
               </div>
-              <div class="col-12">
-                <label class="form-label">QRZ Link (optional)</label>
-                <input type="text" class="form-control" id="newQrzLink" placeholder="https://www.qrz.com/db/OE8YML">
-              </div>
-              <div class="col-12">
-                <button class="btn btn-accent" onclick="createCallsign()">Create Callsign</button>
-              </div>
+            </div>
+            <div class="form-row" id="positionsForm"></div>
+            <button class="btn btn-sm" onclick="savePositions()" style="margin-top: 16px;">Save Positions</button>
+
+            <!-- Delete Section -->
+            <div id="deleteSection">
+              <div class="divider"></div>
+              <button class="btn btn-danger" onclick="deleteCallsign()">Delete Callsign</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Manage Tab -->
-        <div class="tab-pane fade" id="manageTab">
-          <div class="card-container">
-            <h4 class="mb-3">Manage Callsign</h4>
-
-            <div class="mb-3" id="manageSelectContainer">
-              <label class="form-label">Select Callsign</label>
-              <select class="form-select" id="manageSelect" onchange="loadCallsignDetails()">
-                <option value="">-- Select --</option>
+      <!-- Users Tab -->
+      <div class="tab-content" id="usersTab">
+        <div class="card">
+          <div class="card-header">Add New User</div>
+          <div id="usersAlert"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-input" id="newUsername" placeholder="username">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-input" id="newUserPassword" placeholder="min 8 chars">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Callsign</label>
+              <select class="form-select" id="newUserCallsign">
+                <option value="">-- None --</option>
               </select>
             </div>
-
-            <div id="manageDetails" style="display:none;">
-              <hr>
-              <div id="manageAlert"></div>
-
-              <!-- Card Upload -->
-              <div class="mb-4">
-                <h5>Card Template</h5>
-                <p class="text-muted small">Upload the card.png template (4837 x 3078 px recommended)</p>
-                <input type="file" class="form-control mb-2" id="cardUpload" accept="image/png">
-                <button class="btn btn-accent btn-sm" onclick="uploadCard()">Upload Card Template</button>
-              </div>
-
-              <!-- Background Upload -->
-              <div class="mb-4">
-                <h5>Backgrounds</h5>
-                <div id="backgroundsList" class="mb-3"></div>
-                <input type="file" class="form-control mb-2" id="bgUpload" accept="image/*" multiple>
-                <button class="btn btn-accent btn-sm" onclick="uploadBackgrounds()">Upload Backgrounds</button>
-              </div>
-
-              <!-- Text Positions -->
-              <div class="mb-4">
-                <h5>Text Positions</h5>
-                <p class="text-muted small">Customize where text appears on the card (in pixels)</p>
-                <div class="row g-2" id="positionsForm"></div>
-                <button class="btn btn-accent btn-sm mt-2" onclick="savePositions()">Save Positions</button>
-              </div>
-
-              <!-- Delete (Admin only) -->
-              <div class="mt-4 pt-4 border-top border-secondary" id="deleteSection">
-                <button class="btn btn-outline-danger btn-sm" onclick="deleteCallsign()">Delete Callsign</button>
-              </div>
-            </div>
           </div>
+          <div class="form-check" style="margin-bottom: 16px;">
+            <input type="checkbox" id="newUserAdmin">
+            <label for="newUserAdmin">Admin privileges</label>
+          </div>
+          <button class="btn" onclick="createUser()">Create User</button>
         </div>
 
-        <!-- Users Tab (Admin only) -->
-        <div class="tab-pane fade" id="usersTab">
-          <div class="card-container">
-            <h4 class="mb-3">User Management</h4>
-            <div id="usersAlert"></div>
-
-            <div class="mb-4">
-              <h5>Add New User</h5>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label">Username</label>
-                  <input type="text" class="form-control" id="newUsername" placeholder="username">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Password</label>
-                  <input type="password" class="form-control" id="newUserPassword" placeholder="min 8 chars">
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label">Callsign (optional)</label>
-                  <select class="form-select" id="newUserCallsign">
-                    <option value="">-- None --</option>
-                  </select>
-                </div>
-                <div class="col-md-4">
-                  <div class="form-check mt-4">
-                    <input class="form-check-input" type="checkbox" id="newUserAdmin">
-                    <label class="form-check-label">Admin privileges</label>
-                  </div>
-                </div>
-                <div class="col-12">
-                  <button class="btn btn-accent" onclick="createUser()">Create User</button>
-                </div>
-              </div>
-            </div>
-
-            <hr>
-            <h5 class="mb-3">Existing Users</h5>
-            <div id="usersList"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Change Password Modal -->
-    <div class="modal fade" id="passwordModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content" style="background: var(--card-bg); color: var(--text);">
-          <div class="modal-header border-secondary">
-            <h5 class="modal-title">Change Password</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div id="passwordAlert"></div>
-            <div class="mb-3">
-              <label class="form-label">Current Password</label>
-              <input type="password" class="form-control" id="currentPassword">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">New Password</label>
-              <input type="password" class="form-control" id="newPassword" placeholder="min 8 chars">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control" id="confirmPassword">
-            </div>
-          </div>
-          <div class="modal-footer border-secondary">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-accent" onclick="changePassword()">Change Password</button>
-          </div>
+        <div class="card">
+          <div class="card-header">Existing Users</div>
+          <div id="usersList"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Change Password Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Change Password</h3>
+        <button class="modal-close" onclick="hideChangePassword()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="passwordAlert"></div>
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" class="form-input" id="currentPassword">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="newPassword" placeholder="min 8 chars">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" class="form-input" id="confirmPassword">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideChangePassword()">Cancel</button>
+        <button class="btn" onclick="changePassword()">Change Password</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let token = localStorage.getItem('authToken') || '';
     let currentUser = null;
     let callsigns = [];
-    let passwordModal;
 
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(tabId + 'Tab').classList.add('active');
+      });
+    });
+
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
-      passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
-      if (token) {
-        checkAuth();
-      }
+      if (token) checkAuth();
     });
 
     // API calls with Bearer token
@@ -357,7 +847,8 @@
     }
 
     // Login
-    async function login() {
+    async function login(e) {
+      e.preventDefault();
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
 
@@ -387,7 +878,7 @@
       }
     }
 
-    // Check if token is still valid
+    // Check auth
     async function checkAuth() {
       try {
         const response = await apiCall('/api/auth/me');
@@ -419,49 +910,49 @@
       const el = document.getElementById('authError');
       el.textContent = msg;
       el.style.display = 'block';
+      setTimeout(() => el.style.display = 'none', 5000);
     }
 
     // Show admin panel
     function showAdmin() {
       document.getElementById('authSection').style.display = 'none';
       document.getElementById('adminSection').style.display = 'block';
-      document.getElementById('currentUser').textContent = currentUser.username + (currentUser.isAdmin ? ' (Admin)' : '');
+
+      const userDisplay = currentUser.username + (currentUser.isAdmin ? '<span class="admin-badge">Admin</span>' : '');
+      document.getElementById('currentUser').innerHTML = userDisplay;
 
       // Show/hide admin-only features
       const isAdmin = currentUser.isAdmin;
-      document.getElementById('addTabNav').style.display = isAdmin ? 'block' : 'none';
-      document.getElementById('usersTabNav').style.display = isAdmin ? 'block' : 'none';
-      document.getElementById('deleteSection').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('addTabBtn').style.display = isAdmin ? '' : 'none';
+      document.getElementById('usersTabBtn').style.display = isAdmin ? '' : 'none';
+      document.getElementById('deleteSection').style.display = isAdmin ? '' : 'none';
 
-      // For non-admins, only show their callsign in manage dropdown
+      // Non-admin: hide callsign dropdown
       if (!isAdmin && currentUser.callsign) {
         document.getElementById('manageSelectContainer').style.display = 'none';
       }
 
       loadCallsigns();
-      if (isAdmin) {
-        loadUsers();
-      }
+      if (isAdmin) loadUsers();
     }
 
-    // Load callsigns (admin only)
+    // Load callsigns
     async function loadCallsigns() {
       try {
         const response = await apiCall('/api/admin/callsigns');
         callsigns = await response.json();
 
-        // Update list
         const list = document.getElementById('callsignsList');
         if (callsigns.length === 0) {
-          list.innerHTML = '<p class="text-muted">No callsigns registered</p>';
+          list.innerHTML = '<div class="empty-state">No callsigns registered</div>';
         } else {
           list.innerHTML = callsigns.map(cs => `
-            <div class="callsign-item">
-              <div>
+            <div class="list-item">
+              <div class="list-item-info">
                 <h4>${cs.id.toUpperCase()}</h4>
                 <p>${cs.name}</p>
               </div>
-              <a href="/${cs.id}" target="_blank" class="btn btn-sm btn-outline-light">Open</a>
+              <a href="/${cs.id}" target="_blank" class="btn btn-sm btn-outline">Open</a>
             </div>
           `).join('');
         }
@@ -472,7 +963,6 @@
           select.innerHTML = '<option value="">-- Select --</option>' +
             callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()} - ${cs.name}</option>`).join('');
         } else if (currentUser.callsign) {
-          // Non-admin can only manage their own callsign
           select.innerHTML = `<option value="${currentUser.callsign}">${currentUser.callsign.toUpperCase()}</option>`;
           loadCallsignDetails();
         }
@@ -488,25 +978,29 @@
       }
     }
 
-    // Load users (admin only)
+    // Load users
     async function loadUsers() {
       try {
         const response = await apiCall('/api/admin/users');
         const users = await response.json();
 
         const list = document.getElementById('usersList');
-        list.innerHTML = users.map(u => `
-          <div class="user-item">
-            <div>
-              <h4>${u.username}${u.isAdmin ? '<span class="badge-admin">Admin</span>' : ''}</h4>
-              <p>Callsign: ${u.callsign?.toUpperCase() || 'None'} | Last login: ${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</p>
+        if (users.length === 0) {
+          list.innerHTML = '<div class="empty-state">No users found</div>';
+        } else {
+          list.innerHTML = users.map(u => `
+            <div class="list-item">
+              <div class="list-item-info">
+                <h4>${u.username}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ''}</h4>
+                <p>Callsign: ${u.callsign?.toUpperCase() || 'None'} | Last login: ${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</p>
+              </div>
+              <div class="list-item-actions">
+                <button class="btn btn-sm btn-outline" onclick="resetUserPassword(${u.id}, '${u.username}')">Reset Password</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
+              </div>
             </div>
-            <div>
-              <button class="btn btn-sm btn-outline-light me-1" onclick="resetUserPassword(${u.id}, '${u.username}')">Reset Password</button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
-            </div>
-          </div>
-        `).join('');
+          `).join('');
+        }
       } catch (e) {
         console.error('Failed to load users:', e);
       }
@@ -520,7 +1014,7 @@
       const isAdmin = document.getElementById('newUserAdmin').checked;
 
       if (!username || !password) {
-        showAlert('usersAlert', 'Username and password required', 'danger');
+        showAlert('usersAlert', 'Username and password required', 'error');
         return;
       }
 
@@ -540,10 +1034,10 @@
           loadUsers();
         } else {
           const err = await response.json();
-          showAlert('usersAlert', err.error || 'Failed to create user', 'danger');
+          showAlert('usersAlert', err.error || 'Failed to create user', 'error');
         }
       } catch (e) {
-        showAlert('usersAlert', 'Request failed', 'danger');
+        showAlert('usersAlert', 'Request failed', 'error');
       }
     }
 
@@ -568,10 +1062,10 @@
           showAlert('usersAlert', 'Password reset successfully', 'success');
         } else {
           const err = await response.json();
-          showAlert('usersAlert', err.error || 'Failed to reset password', 'danger');
+          showAlert('usersAlert', err.error || 'Failed to reset password', 'error');
         }
       } catch (e) {
-        showAlert('usersAlert', 'Request failed', 'danger');
+        showAlert('usersAlert', 'Request failed', 'error');
       }
     }
 
@@ -589,10 +1083,10 @@
           loadUsers();
         } else {
           const err = await response.json();
-          showAlert('usersAlert', err.error || 'Failed to delete user', 'danger');
+          showAlert('usersAlert', err.error || 'Failed to delete user', 'error');
         }
       } catch (e) {
-        showAlert('usersAlert', 'Request failed', 'danger');
+        showAlert('usersAlert', 'Request failed', 'error');
       }
     }
 
@@ -603,7 +1097,7 @@
       const qrzLink = document.getElementById('newQrzLink').value.trim();
 
       if (!id || !name) {
-        showAlert('addAlert', 'Please fill in ID and Name', 'danger');
+        showAlert('addAlert', 'Please fill in ID and Name', 'error');
         return;
       }
 
@@ -622,14 +1116,14 @@
           loadCallsigns();
         } else {
           const err = await response.json();
-          showAlert('addAlert', err.error || 'Failed to create', 'danger');
+          showAlert('addAlert', err.error || 'Failed to create', 'error');
         }
       } catch (e) {
-        showAlert('addAlert', 'Request failed', 'danger');
+        showAlert('addAlert', 'Request failed', 'error');
       }
     }
 
-    // Load callsign details for management
+    // Load callsign details
     async function loadCallsignDetails() {
       const callsign = document.getElementById('manageSelect').value;
       const details = document.getElementById('manageDetails');
@@ -640,7 +1134,6 @@
       }
 
       try {
-        // Use protected endpoints - admins use admin API, users use manage API
         const configUrl = currentUser.isAdmin
           ? `/api/callsigns/${callsign}`
           : '/api/manage/callsign';
@@ -659,10 +1152,10 @@
         // Show backgrounds
         const bgList = document.getElementById('backgroundsList');
         if (backgrounds.length === 0) {
-          bgList.innerHTML = '<p class="text-muted small">No backgrounds uploaded</p>';
+          bgList.innerHTML = '<span class="empty-state" style="padding: 8px;">No backgrounds uploaded</span>';
         } else {
           bgList.innerHTML = backgrounds.map(bg => `
-            <span class="bg-item">
+            <span class="bg-tag">
               ${bg.displayName}
               <button onclick="deleteBackground('${callsign}', '${bg.filename}')">&times;</button>
             </span>
@@ -675,13 +1168,13 @@
         const labels = { callsign: 'Callsign', utcDateTime: 'Date/Time', frequency: 'Frequency', mode: 'Mode', rst: 'RST', additional: 'Remarks' };
 
         posForm.innerHTML = fields.map(field => `
-          <div class="col-6 col-md-4">
-            <label class="form-label small">${labels[field]} X</label>
-            <input type="number" class="form-control form-control-sm" id="pos_${field}_x" value="${config.textPositions?.[field]?.x || 0}">
+          <div class="form-group">
+            <label class="form-label">${labels[field]} X</label>
+            <input type="number" class="form-input" id="pos_${field}_x" value="${config.textPositions?.[field]?.x || 0}">
           </div>
-          <div class="col-6 col-md-4">
-            <label class="form-label small">${labels[field]} Y</label>
-            <input type="number" class="form-control form-control-sm" id="pos_${field}_y" value="${config.textPositions?.[field]?.y || 0}">
+          <div class="form-group">
+            <label class="form-label">${labels[field]} Y</label>
+            <input type="number" class="form-input" id="pos_${field}_y" value="${config.textPositions?.[field]?.y || 0}">
           </div>
         `).join('');
 
@@ -697,7 +1190,7 @@
       const file = document.getElementById('cardUpload').files[0];
 
       if (!file) {
-        showAlert('manageAlert', 'Please select a file', 'danger');
+        showAlert('manageAlert', 'Please select a file', 'error');
         return;
       }
 
@@ -718,10 +1211,10 @@
           showAlert('manageAlert', 'Card uploaded successfully!', 'success');
           document.getElementById('cardUpload').value = '';
         } else {
-          showAlert('manageAlert', 'Upload failed', 'danger');
+          showAlert('manageAlert', 'Upload failed', 'error');
         }
       } catch (e) {
-        showAlert('manageAlert', 'Upload failed', 'danger');
+        showAlert('manageAlert', 'Upload failed', 'error');
       }
     }
 
@@ -731,7 +1224,7 @@
       const files = document.getElementById('bgUpload').files;
 
       if (files.length === 0) {
-        showAlert('manageAlert', 'Please select files', 'danger');
+        showAlert('manageAlert', 'Please select files', 'error');
         return;
       }
 
@@ -753,7 +1246,8 @@
         } catch (e) {}
       }
 
-      showAlert('manageAlert', `Uploaded ${success}/${files.length} files`, success === files.length ? 'success' : 'warning');
+      const type = success === files.length ? 'success' : 'warning';
+      showAlert('manageAlert', `Uploaded ${success}/${files.length} files`, type);
       document.getElementById('bgUpload').value = '';
       loadCallsignDetails();
     }
@@ -806,10 +1300,10 @@
         if (response.ok) {
           showAlert('manageAlert', 'Positions saved!', 'success');
         } else {
-          showAlert('manageAlert', 'Save failed', 'danger');
+          showAlert('manageAlert', 'Save failed', 'error');
         }
       } catch (e) {
-        showAlert('manageAlert', 'Save failed', 'danger');
+        showAlert('manageAlert', 'Save failed', 'error');
       }
     }
 
@@ -830,7 +1324,7 @@
           loadCallsigns();
         }
       } catch (e) {
-        showAlert('manageAlert', 'Delete failed', 'danger');
+        showAlert('manageAlert', 'Delete failed', 'error');
       }
     }
 
@@ -840,7 +1334,11 @@
       document.getElementById('newPassword').value = '';
       document.getElementById('confirmPassword').value = '';
       document.getElementById('passwordAlert').innerHTML = '';
-      passwordModal.show();
+      document.getElementById('passwordModal').classList.add('active');
+    }
+
+    function hideChangePassword() {
+      document.getElementById('passwordModal').classList.remove('active');
     }
 
     async function changePassword() {
@@ -849,17 +1347,17 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (!currentPassword || !newPassword) {
-        showAlert('passwordAlert', 'Please fill all fields', 'danger');
+        showAlert('passwordAlert', 'Please fill all fields', 'error');
         return;
       }
 
       if (newPassword.length < 8) {
-        showAlert('passwordAlert', 'New password must be at least 8 characters', 'danger');
+        showAlert('passwordAlert', 'New password must be at least 8 characters', 'error');
         return;
       }
 
       if (newPassword !== confirmPassword) {
-        showAlert('passwordAlert', 'Passwords do not match', 'danger');
+        showAlert('passwordAlert', 'Passwords do not match', 'error');
         return;
       }
 
@@ -872,19 +1370,24 @@
 
         if (response.ok) {
           showAlert('passwordAlert', 'Password changed successfully!', 'success');
-          setTimeout(() => passwordModal.hide(), 1500);
+          setTimeout(() => hideChangePassword(), 1500);
         } else {
           const err = await response.json();
-          showAlert('passwordAlert', err.error || 'Failed to change password', 'danger');
+          showAlert('passwordAlert', err.error || 'Failed to change password', 'error');
         }
       } catch (e) {
-        showAlert('passwordAlert', 'Request failed', 'danger');
+        showAlert('passwordAlert', 'Request failed', 'error');
       }
     }
 
+    // Close modal on overlay click
+    document.getElementById('passwordModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) hideChangePassword();
+    });
+
     // Show alert
     function showAlert(id, message, type) {
-      document.getElementById(id).innerHTML = `<div class="alert alert-${type} py-2">${message}</div>`;
+      document.getElementById(id).innerHTML = `<div class="alert alert-${type}">${message}</div>`;
       setTimeout(() => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';

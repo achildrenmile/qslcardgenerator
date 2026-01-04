@@ -2,11 +2,33 @@ node_modules/
 .env
 *.log
 
-# Keep data structure but not content
-data/cards/*
-!data/cards/.gitkeep
+# ===========================================
+# DATA PROTECTION - NEVER COMMIT USER DATA
+# ===========================================
 
-# SQLite database (contains user passwords)
-data/*.db
-data/*.db-wal
-data/*.db-shm
+# All runtime data (callsigns, cards, uploads)
+data/
+
+# Ensure data directory structure can be recreated
+!data/.gitkeep
+
+# SQLite databases (contains passwords, sessions, audit logs)
+*.db
+*.db-wal
+*.db-shm
+
+# Uploaded images and generated cards
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+*.tmp
+.DS_Store
+Thumbs.db

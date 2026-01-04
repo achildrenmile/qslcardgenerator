@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Radio wave arcs -->
+  <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Signal waves -->
+  <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+  <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+
+  <!-- QSL card base -->
+  <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+  <line x1="42" y1="84" x2="58" y2="84" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="42" y1="91" x2="78" y2="91" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <line x1="42" y1="98" x2="68" y2="98" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>
