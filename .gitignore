@@ -24,6 +24,10 @@ data/
 *.gif
 *.webp
 
+# Exception: Demo assets (stored in repo for public demo view)
+!public/demo/card.png
+!public/demo/backgrounds/*.jpg
+
 # Backup files
 *.bak
 *.backup

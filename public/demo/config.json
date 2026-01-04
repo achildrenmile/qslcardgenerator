@@ -1,0 +1,31 @@
+{
+  "id": "oe0test",
+  "name": "OE0TEST Demo",
+  "qrzLink": "https://www.qrz.com/db/OE0TEST",
+  "textPositions": {
+    "callsign": {
+      "x": 3368,
+      "y": 2026
+    },
+    "utcDateTime": {
+      "x": 2623,
+      "y": 2499
+    },
+    "frequency": {
+      "x": 3398,
+      "y": 2499
+    },
+    "mode": {
+      "x": 3906,
+      "y": 2499
+    },
+    "rst": {
+      "x": 4353,
+      "y": 2499
+    },
+    "additional": {
+      "x": 2027,
+      "y": 2760
+    }
+  }
+}

@@ -1,8 +1,15 @@
 {
   "app": {
     "title": "QSL-Karten Generator",
-    "subtitle": "Erstelle personalisierte QSL-Karten f\u00fcr deine Kontakte",
-    "footer": "QSL-Karten Generator f\u00fcr Amateurfunker"
+    "subtitle": "Erstelle personalisierte QSL-Karten für deine Kontakte",
+    "footer": "QSL-Karten Generator für Amateurfunker"
+  },
+  "demo": {
+    "banner": "Dies ist eine Demo-Ansicht. Bearbeitung oder Speicherung ist nicht möglich.",
+    "loginLink": "Anmelden für vollen Zugriff",
+    "infoBox": "Teste den QSL-Karten Generator! Gib Kontaktdaten ein, um eine Vorschau deiner QSL-Karte zu sehen.",
+    "tryDemo": "Demo testen",
+    "demoDescription": "QSL-Karten Generator ohne Registrierung ausprobieren"
   },
   "nav": {
     "home": "Startseite",

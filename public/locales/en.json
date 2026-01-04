@@ -4,6 +4,13 @@
     "subtitle": "Create personalized QSL cards for your contacts",
     "footer": "QSL Card Generator for Amateur Radio Operators"
   },
+  "demo": {
+    "banner": "This is a demo view. No editing or saving is possible.",
+    "loginLink": "Login for full access",
+    "infoBox": "Try out the QSL Card Generator! Enter contact details below to preview how your QSL card would look.",
+    "tryDemo": "Try Demo",
+    "demoDescription": "Try the QSL Card Generator without registration"
+  },
   "nav": {
     "home": "Home",
     "admin": "Admin",

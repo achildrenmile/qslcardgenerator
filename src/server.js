@@ -853,8 +853,13 @@ app.get('/:callsign', (req, res) => {
   const callsign = req.params.callsign.toLowerCase();
 
   // Skip if it's a known static file
-  if (['admin.html', 'index.html', '404.html', 'generator.html'].includes(req.params.callsign)) {
+  if (['admin.html', 'index.html', '404.html', 'generator.html', 'demo.html'].includes(req.params.callsign)) {
     return res.sendFile(path.join(__dirname, '../public', req.params.callsign));
+  }
+
+  // Handle demo route - serves public demo without authentication
+  if (callsign === 'demo') {
+    return res.sendFile(path.join(__dirname, '../public/demo.html'));
   }
 
   const config = getCallsignConfig(callsign);

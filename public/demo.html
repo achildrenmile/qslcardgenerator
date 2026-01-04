@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QSL Card Generator - Demo</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <script src="/js/i18n.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --border: #475569;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Demo Banner */
+    .demo-banner {
+      background: linear-gradient(90deg, var(--warning), #d97706);
+      color: #1a1a1a;
+      text-align: center;
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .demo-banner a {
+      color: #1a1a1a;
+      text-decoration: underline;
+      margin-left: 8px;
+    }
+
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .topbar-logo {
+      width: 32px;
+      height: 32px;
+      color: var(--accent);
+    }
+
+    .topbar-title {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .topbar-callsign {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .topbar-demo {
+      background: var(--warning);
+      color: #1a1a1a;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-left: 8px;
+    }
+
+    .topbar-user {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-sm:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Main Layout */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Card Preview */
+    .preview-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .preview-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .qrz-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .qrz-link:hover {
+      text-decoration: underline;
+    }
+
+    .canvas-wrapper {
+      background: var(--bg-primary);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+
+    #qslCanvas {
+      max-width: 100%;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .download-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Form Section */
+    .form-section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .form-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-input.caps {
+      text-transform: uppercase;
+    }
+
+    .form-textarea {
+      resize: none;
+      min-height: 70px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .form-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    /* Language Switcher */
+    .lang-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: 6px;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .form-section {
+        order: -1;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        padding: 12px 16px;
+      }
+
+      .topbar-title {
+        display: none;
+      }
+
+      .main {
+        padding: 16px;
+        gap: 16px;
+      }
+
+      .preview-section, .form-section {
+        padding: 16px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    <span data-i18n="demo.banner">This is a demo view. No editing or saving is possible.</span>
+    <a href="/" data-i18n="demo.loginLink">Login for full access</a>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent">
+    <nav class="topbar">
+      <a href="/" class="topbar-brand">
+        <svg class="topbar-logo" viewBox="0 0 120 120" fill="none">
+          <path d="M60 85 L60 45" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L45 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M60 45 L75 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+          <path d="M38 68 Q30 60 38 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M28 74 Q16 60 28 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M82 68 Q90 60 82 52" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+          <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
+        </svg>
+        <span class="topbar-title" data-i18n="nav.generator">QSL Generator</span>
+        <span class="topbar-callsign">OE0TEST</span>
+        <span class="topbar-demo">Demo</span>
+      </a>
+      <div class="topbar-user">
+        <div class="lang-switch" style="margin-right: 8px;">
+          <button class="lang-btn" onclick="switchLang('de')" id="langDe">DE</button>
+          <button class="lang-btn" onclick="switchLang('en')" id="langEn">EN</button>
+        </div>
+        <a href="/" class="btn-sm" data-i18n="auth.signIn">Sign In</a>
+      </div>
+    </nav>
+
+    <main class="main">
+      <section class="preview-section">
+        <div class="preview-header">
+          <h2 class="preview-title" data-i18n="generator.cardPreview">QSL Card Preview</h2>
+          <a href="https://www.qrz.com/db/OE0TEST" target="_blank" class="qrz-link" data-i18n="generator.viewOnQrz">View on QRZ.com</a>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="qslCanvas"></canvas>
+        </div>
+        <div class="download-section">
+          <button id="downloadBtn" class="btn">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12.586l-4.293-4.293-1.414 1.414L10 15.414l5.707-5.707-1.414-1.414z"/>
+              <path d="M10 2v10h-2V2z" transform="translate(1, 0)"/>
+              <path d="M3 16h14v2H3z"/>
+            </svg>
+            <span data-i18n="generator.downloadCard">Download QSL Card</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2 class="form-title" data-i18n="generator.cardDetails">Card Details</h2>
+
+        <div class="info-box" data-i18n="demo.infoBox">
+          Try out the QSL Card Generator! Enter contact details below to preview how your QSL card would look.
+        </div>
+
+        <form id="qslForm">
+          <div class="form-group">
+            <label class="form-label" data-i18n="generator.contactCallsign">Contact Callsign</label>
+            <input type="text" class="form-input caps" id="callsign" placeholder="e.g. DL5XYZ">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="generator.dateTime">Date & Time (UTC)</label>
+            <input type="text" class="form-input" id="utcDateTime" placeholder="DD.MM.YYYY HH:MM">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" data-i18n="generator.frequency">Frequency</label>
+              <input type="text" class="form-input" id="frequency" placeholder="MHz">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="generator.mode">Mode</label>
+              <input type="text" class="form-input caps" id="mode" placeholder="e.g. FM">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="generator.rst">RST</label>
+              <input type="text" class="form-input" id="rst" placeholder="e.g. 59">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="generator.additionalRemarks">Additional Remarks</label>
+            <textarea class="form-textarea" id="additional" rows="2"></textarea>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="generator.background">Background</label>
+            <select class="form-select" id="backgroundSelect">
+              <option value="" data-i18n="generator.selectBackground">Select a background...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" data-i18n="generator.customBackground">Custom Background</label>
+            <input type="file" class="form-input" id="customBackground" accept="image/*">
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <footer style="text-align: center; padding: 24px; border-top: 1px solid var(--border); margin-top: 24px;">
+    <div style="margin-bottom: 8px;">
+      <a href="/imprint.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;" data-i18n="footer.imprint">Imprint</a>
+      <a href="/privacy.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;" data-i18n="footer.privacy">Privacy Policy</a>
+    </div>
+  </footer>
+
+  <script>
+    // Demo configuration - loaded from static files
+    const config = {
+      id: 'oe0test',
+      name: 'OE0TEST Demo',
+      qrzLink: 'https://www.qrz.com/db/OE0TEST',
+      textPositions: {
+        callsign: { x: 3368, y: 2026 },
+        utcDateTime: { x: 2623, y: 2499 },
+        frequency: { x: 3398, y: 2499 },
+        mode: { x: 3906, y: 2499 },
+        rst: { x: 4353, y: 2499 },
+        additional: { x: 2027, y: 2760 }
+      }
+    };
+
+    const positions = config.textPositions;
+    const SCALE_FACTOR = 0.4;
+
+    // Initialize i18n
+    document.addEventListener('DOMContentLoaded', async () => {
+      await i18n.init();
+      updateLangButtons();
+      document.getElementById('additional').value = i18n.t('generator.defaultRemarks');
+      loadGenerator();
+    });
+
+    function switchLang(lang) {
+      i18n.setLanguage(lang);
+      updateLangButtons();
+      const additionalEl = document.getElementById('additional');
+      const currentVal = additionalEl.value;
+      if (currentVal === 'Thanks for the QSO\nBest regards' || currentVal === 'Danke für das QSO\nBeste Grüße') {
+        additionalEl.value = i18n.t('generator.defaultRemarks');
+      }
+    }
+
+    function updateLangButtons() {
+      const lang = i18n.getLanguage();
+      document.getElementById('langDe').classList.toggle('active', lang === 'de');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    }
+
+    const canvas = document.getElementById('qslCanvas');
+    const ctx = canvas.getContext('2d');
+    const cardImage = new Image();
+    const backgroundImage = new Image();
+
+    async function loadGenerator() {
+      document.title = 'QSL Card Generator - Demo (OE0TEST)';
+      await loadBackgrounds();
+      loadCardImage();
+    }
+
+    async function loadBackgrounds() {
+      try {
+        const response = await fetch('/demo/backgrounds.json');
+        const backgrounds = await response.json();
+        const select = document.getElementById('backgroundSelect');
+        select.innerHTML = `<option value="" data-i18n="generator.selectBackground">${i18n.t('generator.selectBackground')}</option>`;
+
+        backgrounds.forEach(bg => {
+          const option = document.createElement('option');
+          option.value = bg.filename;
+          option.textContent = bg.displayName;
+          select.appendChild(option);
+        });
+
+        if (backgrounds.length > 0) {
+          select.value = backgrounds[0].filename;
+          loadBackground(backgrounds[0].filename);
+        }
+      } catch (error) {
+        console.error('Failed to load backgrounds:', error);
+      }
+    }
+
+    function loadCardImage() {
+      cardImage.onload = () => {
+        canvas.width = cardImage.width * SCALE_FACTOR;
+        canvas.height = cardImage.height * SCALE_FACTOR;
+        drawCanvas();
+      };
+      cardImage.src = '/demo/card.png';
+    }
+
+    function loadBackground(filename) {
+      backgroundImage.onload = drawCanvas;
+      backgroundImage.src = `/demo/backgrounds/${filename}`;
+    }
+
+    function drawCanvas() {
+      if (!cardImage.complete) return;
+
+      if (backgroundImage.complete && backgroundImage.src) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      ctx.drawImage(cardImage, 0, 0, canvas.width, canvas.height);
+
+      const callsign = document.getElementById('callsign').value.toUpperCase();
+      const utcDateTime = document.getElementById('utcDateTime').value;
+      const frequency = document.getElementById('frequency').value;
+      const mode = document.getElementById('mode').value.toUpperCase();
+      const rst = document.getElementById('rst').value;
+      const additional = document.getElementById('additional').value.split('\n');
+
+      let formattedDateTime = utcDateTime;
+      if (utcDateTime) {
+        try {
+          const parts = utcDateTime.split(' ');
+          const datePart = parts[0].split('.');
+          const timePart = (parts[1] || '00:00').split(':');
+          const d = new Date(datePart[2], datePart[1] - 1, datePart[0], timePart[0], timePart[1]);
+          formattedDateTime = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        } catch (e) {}
+      }
+
+      ctx.fillStyle = 'black';
+      ctx.textBaseline = 'middle';
+      ctx.font = `${100 * SCALE_FACTOR}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText(callsign, positions.callsign.x * SCALE_FACTOR, positions.callsign.y * SCALE_FACTOR);
+
+      ctx.font = `${80 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(formattedDateTime, positions.utcDateTime.x * SCALE_FACTOR, positions.utcDateTime.y * SCALE_FACTOR);
+
+      ctx.font = `${100 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(frequency, positions.frequency.x * SCALE_FACTOR, positions.frequency.y * SCALE_FACTOR);
+      ctx.fillText(mode, positions.mode.x * SCALE_FACTOR, positions.mode.y * SCALE_FACTOR);
+      ctx.fillText(rst, positions.rst.x * SCALE_FACTOR, positions.rst.y * SCALE_FACTOR);
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.font = `bold ${100 * SCALE_FACTOR}px Arial`;
+      ctx.fillText(additional[0] || '', positions.additional.x * SCALE_FACTOR, positions.additional.y * SCALE_FACTOR);
+      ctx.fillText(additional[1] || '', positions.additional.x * SCALE_FACTOR, positions.additional.y * SCALE_FACTOR + (120 * SCALE_FACTOR));
+    }
+
+    document.getElementById('backgroundSelect').addEventListener('change', function() {
+      if (this.value && this.value !== 'custom') {
+        loadBackground(this.value);
+        const customOpt = this.querySelector('option[value="custom"]');
+        if (customOpt) customOpt.remove();
+      }
+    });
+
+    document.getElementById('customBackground').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          backgroundImage.src = ev.target.result;
+          const select = document.getElementById('backgroundSelect');
+          let customOpt = select.querySelector('option[value="custom"]');
+          if (!customOpt) {
+            customOpt = document.createElement('option');
+            customOpt.value = 'custom';
+            customOpt.textContent = i18n.t('generator.customUpload');
+            select.appendChild(customOpt);
+          }
+          select.value = 'custom';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.querySelectorAll('#qslForm input, #qslForm textarea').forEach(el => {
+      el.addEventListener('input', drawCanvas);
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      const callsignVal = document.getElementById('callsign').value || 'DEMO';
+      const link = document.createElement('a');
+      link.download = `${callsignVal.toUpperCase()}_OE0TEST_DEMO.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    function setCurrentUTC() {
+      const now = new Date();
+      const formatted = `${String(now.getUTCDate()).padStart(2, '0')}.${String(now.getUTCMonth() + 1).padStart(2, '0')}.${now.getUTCFullYear()} ${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}`;
+      document.getElementById('utcDateTime').value = formatted;
+    }
+
+    setCurrentUTC();
+  </script>
+</body>
+</html>
