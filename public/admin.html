@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - QSL Card Generator</title>
   <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="stylesheet" href="/fonts/fonts.css">
+  <script src="/js/i18n.js"></script>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -537,6 +538,36 @@
       color: var(--text-muted);
     }
 
+    /* Language Switcher */
+    .lang-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: 6px;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .navbar-content {
@@ -594,22 +625,22 @@
           <line x1="42" y1="91" x2="78" y2="91" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
           <line x1="42" y1="98" x2="68" y2="98" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
         </svg>
-        <h1>Admin Panel</h1>
-        <p>Sign in to manage QSL cards</p>
+        <h1 data-i18n="admin.panel">Admin Panel</h1>
+        <p data-i18n="admin.signInToManage">Sign in to manage QSL cards</p>
       </div>
 
       <div class="card">
         <div id="authError" class="alert alert-error" style="display: none;"></div>
         <form onsubmit="login(event)">
           <div class="form-group">
-            <label class="form-label" for="loginUsername">Username</label>
-            <input type="text" class="form-input" id="loginUsername" placeholder="Enter username" autocomplete="username" required>
+            <label class="form-label" for="loginUsername" data-i18n="auth.username">Username</label>
+            <input type="text" class="form-input" id="loginUsername" data-i18n-placeholder="auth.enterUsername" placeholder="Enter username" autocomplete="username" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="loginPassword">Password</label>
-            <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" autocomplete="current-password" required>
+            <label class="form-label" for="loginPassword" data-i18n="auth.password">Password</label>
+            <input type="password" class="form-input" id="loginPassword" data-i18n-placeholder="auth.enterPassword" placeholder="Enter password" autocomplete="current-password" required>
           </div>
-          <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+          <button type="submit" class="btn" style="width: 100%;" data-i18n="auth.signIn">Sign In</button>
         </form>
       </div>
     </div>
@@ -637,8 +668,12 @@
             <strong id="currentUser"></strong>
           </span>
           <div class="btn-group">
-            <button class="btn btn-sm btn-outline" onclick="showChangePassword()">Change Password</button>
-            <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
+            <div class="lang-switch" style="margin-right: 4px;">
+              <button class="lang-btn" onclick="switchLang('de')" id="langDe">DE</button>
+              <button class="lang-btn" onclick="switchLang('en')" id="langEn">EN</button>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="showChangePassword()" data-i18n="auth.changePassword">Change Password</button>
+            <button class="btn btn-sm btn-secondary" onclick="logout()" data-i18n="auth.logout">Logout</button>
           </div>
         </div>
       </div>
@@ -646,16 +681,16 @@
 
     <div class="container">
       <div class="tabs" role="tablist">
-        <button class="tab-btn active" data-tab="callsigns">Callsigns</button>
-        <button class="tab-btn" data-tab="add" id="addTabBtn">Add New</button>
-        <button class="tab-btn" data-tab="manage">Manage</button>
-        <button class="tab-btn" data-tab="users" id="usersTabBtn">Users</button>
+        <button class="tab-btn active" data-tab="callsigns" data-i18n="admin.callsigns">Callsigns</button>
+        <button class="tab-btn" data-tab="add" id="addTabBtn" data-i18n="admin.addNew">Add New</button>
+        <button class="tab-btn" data-tab="manage" data-i18n="admin.manage">Manage</button>
+        <button class="tab-btn" data-tab="users" id="usersTabBtn" data-i18n="admin.users">Users</button>
       </div>
 
       <!-- Callsigns Tab -->
       <div class="tab-content active" id="callsignsTab">
         <div class="card">
-          <div class="card-header">Registered Callsigns</div>
+          <div class="card-header" data-i18n="admin.registeredCallsigns">Registered Callsigns</div>
           <div id="callsignsList"></div>
         </div>
       </div>
@@ -663,35 +698,35 @@
       <!-- Add New Tab -->
       <div class="tab-content" id="addTab">
         <div class="card">
-          <div class="card-header">Add New Callsign</div>
+          <div class="card-header" data-i18n="admin.addNewCallsign">Add New Callsign</div>
           <div id="addAlert"></div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Callsign ID</label>
+              <label class="form-label" data-i18n="admin.callsignId">Callsign ID</label>
               <input type="text" class="form-input" id="newId" placeholder="e.g., oe8yml">
             </div>
             <div class="form-group">
-              <label class="form-label">Display Name</label>
+              <label class="form-label" data-i18n="admin.displayName">Display Name</label>
               <input type="text" class="form-input" id="newName" placeholder="e.g., OE8YML Station">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">QRZ Link (optional)</label>
+            <label class="form-label" data-i18n="admin.qrzLink">QRZ Link (optional)</label>
             <input type="text" class="form-input" id="newQrzLink" placeholder="https://www.qrz.com/db/OE8YML">
           </div>
-          <button class="btn" onclick="createCallsign()">Create Callsign</button>
+          <button class="btn" onclick="createCallsign()" data-i18n="admin.createCallsign">Create Callsign</button>
         </div>
       </div>
 
       <!-- Manage Tab -->
       <div class="tab-content" id="manageTab">
         <div class="card">
-          <div class="card-header">Manage Callsign</div>
+          <div class="card-header" data-i18n="admin.manageCallsign">Manage Callsign</div>
 
           <div class="form-group" id="manageSelectContainer">
-            <label class="form-label">Select Callsign</label>
+            <label class="form-label" data-i18n="admin.selectCallsign">Select Callsign</label>
             <select class="form-select" id="manageSelect" onchange="loadCallsignDetails()">
-              <option value="">-- Select --</option>
+              <option value="" data-i18n="admin.select">-- Select --</option>
             </select>
           </div>
 
@@ -702,43 +737,43 @@
             <!-- Card Upload -->
             <div class="section-header">
               <div>
-                <h4 class="section-title">Card Template</h4>
-                <p class="section-subtitle">Upload card.png (4837 x 3078 px recommended)</p>
+                <h4 class="section-title" data-i18n="admin.cardTemplate">Card Template</h4>
+                <p class="section-subtitle" data-i18n="admin.cardTemplateDesc">Upload card.png (4837 x 3078 px recommended)</p>
               </div>
             </div>
             <div class="form-group">
               <input type="file" class="form-input" id="cardUpload" accept="image/png">
             </div>
-            <button class="btn btn-sm" onclick="uploadCard()">Upload Card</button>
+            <button class="btn btn-sm" onclick="uploadCard()" data-i18n="admin.uploadCard">Upload Card</button>
 
             <div class="divider"></div>
 
             <!-- Backgrounds -->
             <div class="section-header">
-              <h4 class="section-title">Backgrounds</h4>
+              <h4 class="section-title" data-i18n="admin.backgrounds">Backgrounds</h4>
             </div>
             <div class="bg-tags" id="backgroundsList"></div>
             <div class="form-group">
               <input type="file" class="form-input" id="bgUpload" accept="image/*" multiple>
             </div>
-            <button class="btn btn-sm" onclick="uploadBackgrounds()">Upload Backgrounds</button>
+            <button class="btn btn-sm" onclick="uploadBackgrounds()" data-i18n="admin.uploadBackgrounds">Upload Backgrounds</button>
 
             <div class="divider"></div>
 
             <!-- Text Positions -->
             <div class="section-header">
               <div>
-                <h4 class="section-title">Text Positions</h4>
-                <p class="section-subtitle">Customize where text appears on the card (in pixels)</p>
+                <h4 class="section-title" data-i18n="admin.textPositions">Text Positions</h4>
+                <p class="section-subtitle" data-i18n="admin.textPositionsDesc">Customize where text appears on the card (in pixels)</p>
               </div>
             </div>
             <div class="form-row" id="positionsForm"></div>
-            <button class="btn btn-sm" onclick="savePositions()" style="margin-top: 16px;">Save Positions</button>
+            <button class="btn btn-sm" onclick="savePositions()" style="margin-top: 16px;" data-i18n="admin.savePositions">Save Positions</button>
 
             <!-- Delete Section -->
             <div id="deleteSection">
               <div class="divider"></div>
-              <button class="btn btn-danger" onclick="deleteCallsign()">Delete Callsign</button>
+              <button class="btn btn-danger" onclick="deleteCallsign()" data-i18n="admin.deleteCallsign">Delete Callsign</button>
             </div>
           </div>
         </div>
@@ -747,33 +782,33 @@
       <!-- Users Tab -->
       <div class="tab-content" id="usersTab">
         <div class="card">
-          <div class="card-header">Add New User</div>
+          <div class="card-header" data-i18n="admin.addNewUser">Add New User</div>
           <div id="usersAlert"></div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Username</label>
+              <label class="form-label" data-i18n="auth.username">Username</label>
               <input type="text" class="form-input" id="newUsername" placeholder="username">
             </div>
             <div class="form-group">
-              <label class="form-label">Password</label>
-              <input type="password" class="form-input" id="newUserPassword" placeholder="min 8 chars">
+              <label class="form-label" data-i18n="auth.password">Password</label>
+              <input type="password" class="form-input" id="newUserPassword" data-i18n-placeholder="auth.passwordMinChars" placeholder="min 8 chars">
             </div>
             <div class="form-group">
-              <label class="form-label">Callsign</label>
+              <label class="form-label" data-i18n="admin.posCallsign">Callsign</label>
               <select class="form-select" id="newUserCallsign">
-                <option value="">-- None --</option>
+                <option value="" data-i18n="admin.none">-- None --</option>
               </select>
             </div>
           </div>
           <div class="form-check" style="margin-bottom: 16px;">
             <input type="checkbox" id="newUserAdmin">
-            <label for="newUserAdmin">Admin privileges</label>
+            <label for="newUserAdmin" data-i18n="admin.adminPrivileges">Admin privileges</label>
           </div>
-          <button class="btn" onclick="createUser()">Create User</button>
+          <button class="btn" onclick="createUser()" data-i18n="admin.createUser">Create User</button>
         </div>
 
         <div class="card">
-          <div class="card-header">Existing Users</div>
+          <div class="card-header" data-i18n="admin.existingUsers">Existing Users</div>
           <div id="usersList"></div>
         </div>
       </div>
@@ -784,37 +819,37 @@
   <div class="modal-overlay" id="passwordModal">
     <div class="modal">
       <div class="modal-header">
-        <h3>Change Password</h3>
+        <h3 data-i18n="auth.changePassword">Change Password</h3>
         <button class="modal-close" onclick="hideChangePassword()">&times;</button>
       </div>
       <div class="modal-body">
         <div id="passwordAlert"></div>
         <div class="form-group">
-          <label class="form-label">Current Password</label>
+          <label class="form-label" data-i18n="auth.currentPassword">Current Password</label>
           <input type="password" class="form-input" id="currentPassword">
         </div>
         <div class="form-group">
-          <label class="form-label">New Password</label>
-          <input type="password" class="form-input" id="newPassword" placeholder="min 8 chars">
+          <label class="form-label" data-i18n="auth.newPassword">New Password</label>
+          <input type="password" class="form-input" id="newPassword" data-i18n-placeholder="auth.passwordMinChars" placeholder="min 8 chars">
         </div>
         <div class="form-group">
-          <label class="form-label">Confirm New Password</label>
+          <label class="form-label" data-i18n="auth.confirmPassword">Confirm New Password</label>
           <input type="password" class="form-input" id="confirmPassword">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="hideChangePassword()">Cancel</button>
-        <button class="btn" onclick="changePassword()">Change Password</button>
+        <button class="btn btn-secondary" onclick="hideChangePassword()" data-i18n="admin.cancel">Cancel</button>
+        <button class="btn" onclick="changePassword()" data-i18n="auth.changePassword">Change Password</button>
       </div>
     </div>
   </div>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid var(--border); margin-top: 48px;">
     <div style="margin-bottom: 12px;">
-      <a href="/imprint.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.875rem; text-decoration: none;">Imprint</a>
-      <a href="/privacy.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.875rem; text-decoration: none;">Privacy Policy</a>
+      <a href="/imprint.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.875rem; text-decoration: none;" data-i18n="footer.imprint">Imprint</a>
+      <a href="/privacy.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.875rem; text-decoration: none;" data-i18n="footer.privacy">Privacy Policy</a>
     </div>
-    <p style="color: var(--text-muted); font-size: 0.8rem;">QSL Card Generator for Amateur Radio Operators</p>
+    <p style="color: var(--text-muted); font-size: 0.8rem;" data-i18n="app.footer">QSL Card Generator for Amateur Radio Operators</p>
   </footer>
 
   <script>
@@ -835,10 +870,23 @@
       });
     });
 
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
+    // Initialize i18n
+    document.addEventListener('DOMContentLoaded', async () => {
+      await i18n.init();
+      updateLangButtons();
       if (token) checkAuth();
     });
+
+    function switchLang(lang) {
+      i18n.setLanguage(lang);
+      updateLangButtons();
+    }
+
+    function updateLangButtons() {
+      const lang = i18n.getLanguage();
+      document.getElementById('langDe')?.classList.toggle('active', lang === 'de');
+      document.getElementById('langEn')?.classList.toggle('active', lang === 'en');
+    }
 
     // API calls with Bearer token
     async function apiCall(url, options = {}) {
@@ -861,7 +909,7 @@
       const password = document.getElementById('loginPassword').value;
 
       if (!username || !password) {
-        showAuthError('Please enter username and password');
+        showAuthError(i18n.t('errors.usernamePasswordRequired'));
         return;
       }
 
@@ -879,10 +927,10 @@
           localStorage.setItem('authToken', token);
           showAdmin();
         } else {
-          showAuthError(data.error || 'Login failed');
+          showAuthError(data.error || i18n.t('errors.loginFailed'));
         }
       } catch (e) {
-        showAuthError('Connection error');
+        showAuthError(i18n.t('errors.connectionError'));
       }
     }
 
@@ -952,7 +1000,7 @@
 
         const list = document.getElementById('callsignsList');
         if (callsigns.length === 0) {
-          list.innerHTML = '<div class="empty-state">No callsigns registered</div>';
+          list.innerHTML = `<div class="empty-state">${i18n.t('admin.noCallsigns')}</div>`;
         } else {
           list.innerHTML = callsigns.map(cs => `
             <div class="list-item">
@@ -960,7 +1008,7 @@
                 <h4>${cs.id.toUpperCase()}</h4>
                 <p>${cs.name}</p>
               </div>
-              <a href="/${cs.id}" target="_blank" class="btn btn-sm btn-outline">Open</a>
+              <a href="/${cs.id}" target="_blank" class="btn btn-sm btn-outline">${i18n.t('admin.open')}</a>
             </div>
           `).join('');
         }
@@ -968,7 +1016,7 @@
         // Update manage select
         const select = document.getElementById('manageSelect');
         if (currentUser.isAdmin) {
-          select.innerHTML = '<option value="">-- Select --</option>' +
+          select.innerHTML = `<option value="">${i18n.t('admin.select')}</option>` +
             callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()} - ${cs.name}</option>`).join('');
         } else if (currentUser.callsign) {
           select.innerHTML = `<option value="${currentUser.callsign}">${currentUser.callsign.toUpperCase()}</option>`;
@@ -978,7 +1026,7 @@
         // Update user callsign select
         const userCsSelect = document.getElementById('newUserCallsign');
         if (userCsSelect) {
-          userCsSelect.innerHTML = '<option value="">-- None --</option>' +
+          userCsSelect.innerHTML = `<option value="">${i18n.t('admin.none')}</option>` +
             callsigns.map(cs => `<option value="${cs.id}">${cs.id.toUpperCase()}</option>`).join('');
         }
       } catch (e) {
@@ -994,17 +1042,17 @@
 
         const list = document.getElementById('usersList');
         if (users.length === 0) {
-          list.innerHTML = '<div class="empty-state">No users found</div>';
+          list.innerHTML = `<div class="empty-state">${i18n.t('admin.noUsers')}</div>`;
         } else {
           list.innerHTML = users.map(u => `
             <div class="list-item">
               <div class="list-item-info">
                 <h4>${u.username}${u.isAdmin ? '<span class="admin-badge">Admin</span>' : ''}</h4>
-                <p>Callsign: ${u.callsign?.toUpperCase() || 'None'} | Last login: ${u.last_login ? new Date(u.last_login).toLocaleString() : 'Never'}</p>
+                <p>${i18n.t('admin.posCallsign')}: ${u.callsign?.toUpperCase() || i18n.t('admin.none')} | ${i18n.t('admin.lastLogin')}: ${u.last_login ? new Date(u.last_login).toLocaleString() : i18n.t('admin.never')}</p>
               </div>
               <div class="list-item-actions">
-                <button class="btn btn-sm btn-outline" onclick="resetUserPassword(${u.id}, '${u.username}')">Reset Password</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">Delete</button>
+                <button class="btn btn-sm btn-outline" onclick="resetUserPassword(${u.id}, '${u.username}')">${i18n.t('admin.resetPassword')}</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">${i18n.t('admin.delete')}</button>
               </div>
             </div>
           `).join('');
@@ -1022,7 +1070,7 @@
       const isAdmin = document.getElementById('newUserAdmin').checked;
 
       if (!username || !password) {
-        showAlert('usersAlert', 'Username and password required', 'error');
+        showAlert('usersAlert', i18n.t('errors.usernameRequired'), 'error');
         return;
       }
 
@@ -1034,7 +1082,7 @@
         });
 
         if (response.ok) {
-          showAlert('usersAlert', 'User created successfully', 'success');
+          showAlert('usersAlert', i18n.t('success.userCreated'), 'success');
           document.getElementById('newUsername').value = '';
           document.getElementById('newUserPassword').value = '';
           document.getElementById('newUserCallsign').value = '';
@@ -1160,7 +1208,7 @@
         // Show backgrounds
         const bgList = document.getElementById('backgroundsList');
         if (backgrounds.length === 0) {
-          bgList.innerHTML = '<span class="empty-state" style="padding: 8px;">No backgrounds uploaded</span>';
+          bgList.innerHTML = `<span class="empty-state" style="padding: 8px;">${i18n.t('admin.noBackgrounds')}</span>`;
         } else {
           bgList.innerHTML = backgrounds.map(bg => `
             <span class="bg-tag">
@@ -1173,15 +1221,15 @@
         // Show positions form
         const posForm = document.getElementById('positionsForm');
         const fields = ['callsign', 'utcDateTime', 'frequency', 'mode', 'rst', 'additional'];
-        const labels = { callsign: 'Callsign', utcDateTime: 'Date/Time', frequency: 'Frequency', mode: 'Mode', rst: 'RST', additional: 'Remarks' };
+        const labelKeys = { callsign: 'admin.posCallsign', utcDateTime: 'admin.posDateTime', frequency: 'admin.posFrequency', mode: 'admin.posMode', rst: 'admin.posRst', additional: 'admin.posRemarks' };
 
         posForm.innerHTML = fields.map(field => `
           <div class="form-group">
-            <label class="form-label">${labels[field]} X</label>
+            <label class="form-label">${i18n.t(labelKeys[field])} X</label>
             <input type="number" class="form-input" id="pos_${field}_x" value="${config.textPositions?.[field]?.x || 0}">
           </div>
           <div class="form-group">
-            <label class="form-label">${labels[field]} Y</label>
+            <label class="form-label">${i18n.t(labelKeys[field])} Y</label>
             <input type="number" class="form-input" id="pos_${field}_y" value="${config.textPositions?.[field]?.y || 0}">
           </div>
         `).join('');

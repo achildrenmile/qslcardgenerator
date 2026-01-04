@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Not Found - QSL Card Generator</title>
   <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="stylesheet" href="/fonts/fonts.css">
+  <script src="/js/i18n.js"></script>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -101,6 +102,36 @@
     .footer a:hover {
       color: var(--accent);
     }
+
+    .lang-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -114,13 +145,36 @@
     <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
     <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
   </svg>
-  <h1>404</h1>
-  <p class="message">Page not found</p>
-  <a href="/" class="back-link">Back to Home</a>
+  <h1 data-i18n="notFound.title">404</h1>
+  <p class="message" data-i18n="notFound.message">Page not found</p>
+  <a href="/" class="back-link" data-i18n="notFound.backToHome">Back to Home</a>
+
+  <div class="lang-switch">
+    <button class="lang-btn" onclick="switchLang('de')" id="langDe">DE</button>
+    <button class="lang-btn" onclick="switchLang('en')" id="langEn">EN</button>
+  </div>
 
   <div class="footer">
-    <a href="/imprint.html">Imprint</a>
-    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/imprint.html" data-i18n="footer.imprint">Imprint</a>
+    <a href="/privacy.html" data-i18n="footer.privacy">Privacy Policy</a>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await i18n.init();
+      updateLangButtons();
+    });
+
+    function switchLang(lang) {
+      i18n.setLanguage(lang);
+      updateLangButtons();
+    }
+
+    function updateLangButtons() {
+      const lang = i18n.getLanguage();
+      document.getElementById('langDe').classList.toggle('active', lang === 'de');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    }
+  </script>
 </body>
 </html>

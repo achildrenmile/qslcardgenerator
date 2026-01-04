@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QSL Card Generator</title>
   <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="stylesheet" href="/fonts/fonts.css">
+  <script src="/js/i18n.js"></script>
   <style>
     :root {
       --bg-primary: #0f172a;
@@ -336,6 +337,36 @@
       color: var(--text-secondary);
     }
 
+    /* Language Switcher */
+    .lang-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: var(--bg-card);
+      border-radius: 6px;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      color: var(--text-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .main {
@@ -375,27 +406,27 @@
   <!-- Loading Overlay -->
   <div id="loadingOverlay" class="overlay">
     <div class="spinner"></div>
-    <span style="color: var(--text-secondary);">Loading...</span>
+    <span style="color: var(--text-secondary);" data-i18n="loading">Loading...</span>
   </div>
 
   <!-- Auth Overlay -->
   <div id="authOverlay" class="overlay" style="display: none;">
     <div class="auth-card">
-      <h2>Sign In Required</h2>
-      <p>Please sign in to access the QSL Card Generator.</p>
+      <h2 data-i18n="auth.signInRequired">Sign In Required</h2>
+      <p data-i18n="auth.signInRequiredDesc">Please sign in to access the QSL Card Generator.</p>
       <div id="authError" class="alert" style="display: none;"></div>
       <form onsubmit="login(event)">
         <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" class="form-input" id="loginUsername" placeholder="Enter username" required>
+          <label class="form-label" data-i18n="auth.username">Username</label>
+          <input type="text" class="form-input" id="loginUsername" data-i18n-placeholder="auth.enterUsername" placeholder="Enter username" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" required>
+          <label class="form-label" data-i18n="auth.password">Password</label>
+          <input type="password" class="form-input" id="loginPassword" data-i18n-placeholder="auth.enterPassword" placeholder="Enter password" required>
         </div>
-        <button type="submit" class="btn" style="width: 100%;">Sign In</button>
+        <button type="submit" class="btn" style="width: 100%;" data-i18n="auth.signIn">Sign In</button>
       </form>
-      <a href="/" class="back-link">Back to Home</a>
+      <a href="/" class="back-link" data-i18n="auth.backToHome">Back to Home</a>
     </div>
   </div>
 
@@ -413,20 +444,24 @@
           <path d="M92 74 Q104 60 92 46" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
           <rect x="35" y="75" width="50" height="32" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>
         </svg>
-        <span class="topbar-title">QSL Generator</span>
+        <span class="topbar-title" data-i18n="nav.generator">QSL Generator</span>
         <span class="topbar-callsign" id="topbarCallsign"></span>
       </a>
       <div class="topbar-user">
-        <span class="topbar-username">Signed in as <strong id="currentUser"></strong></span>
-        <button class="btn-sm" onclick="logout()">Sign Out</button>
+        <span class="topbar-username"><span data-i18n="auth.signedInAs">Signed in as</span> <strong id="currentUser"></strong></span>
+        <div class="lang-switch" style="margin-right: 8px;">
+          <button class="lang-btn" onclick="switchLang('de')" id="langDe">DE</button>
+          <button class="lang-btn" onclick="switchLang('en')" id="langEn">EN</button>
+        </div>
+        <button class="btn-sm" onclick="logout()" data-i18n="auth.signOut">Sign Out</button>
       </div>
     </nav>
 
     <main class="main">
       <section class="preview-section">
         <div class="preview-header">
-          <h2 class="preview-title" id="stationName">QSL Card Preview</h2>
-          <a id="qrzLink" href="#" target="_blank" class="qrz-link">View on QRZ.com</a>
+          <h2 class="preview-title" id="stationName" data-i18n="generator.cardPreview">QSL Card Preview</h2>
+          <a id="qrzLink" href="#" target="_blank" class="qrz-link" data-i18n="generator.viewOnQrz">View on QRZ.com</a>
         </div>
         <div class="canvas-wrapper">
           <canvas id="qslCanvas"></canvas>
@@ -438,56 +473,55 @@
               <path d="M10 2v10h-2V2z" transform="translate(1, 0)"/>
               <path d="M3 16h14v2H3z"/>
             </svg>
-            Download QSL Card
+            <span data-i18n="generator.downloadCard">Download QSL Card</span>
           </button>
         </div>
       </section>
 
       <section class="form-section">
-        <h2 class="form-title">Card Details</h2>
+        <h2 class="form-title" data-i18n="generator.cardDetails">Card Details</h2>
         <form id="qslForm">
           <div class="form-group">
-            <label class="form-label">Contact Callsign</label>
+            <label class="form-label" data-i18n="generator.contactCallsign">Contact Callsign</label>
             <input type="text" class="form-input caps" id="callsign" placeholder="e.g. DL5XYZ">
           </div>
 
           <div class="form-group">
-            <label class="form-label">Date & Time (UTC)</label>
+            <label class="form-label" data-i18n="generator.dateTime">Date & Time (UTC)</label>
             <input type="text" class="form-input" id="utcDateTime" placeholder="DD.MM.YYYY HH:MM">
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Frequency</label>
+              <label class="form-label" data-i18n="generator.frequency">Frequency</label>
               <input type="text" class="form-input" id="frequency" placeholder="MHz">
             </div>
             <div class="form-group">
-              <label class="form-label">Mode</label>
+              <label class="form-label" data-i18n="generator.mode">Mode</label>
               <input type="text" class="form-input caps" id="mode" placeholder="e.g. FM">
             </div>
             <div class="form-group">
-              <label class="form-label">RST</label>
+              <label class="form-label" data-i18n="generator.rst">RST</label>
               <input type="text" class="form-input" id="rst" placeholder="e.g. 59">
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Additional Remarks</label>
-            <textarea class="form-textarea" id="additional" rows="2">Thanks for the QSO
-Best regards</textarea>
+            <label class="form-label" data-i18n="generator.additionalRemarks">Additional Remarks</label>
+            <textarea class="form-textarea" id="additional" rows="2"></textarea>
           </div>
 
           <div class="form-divider"></div>
 
           <div class="form-group">
-            <label class="form-label">Background</label>
+            <label class="form-label" data-i18n="generator.background">Background</label>
             <select class="form-select" id="backgroundSelect">
-              <option value="">Select a background...</option>
+              <option value="" data-i18n="generator.selectBackground">Select a background...</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Custom Background</label>
+            <label class="form-label" data-i18n="generator.customBackground">Custom Background</label>
             <input type="file" class="form-input" id="customBackground" accept="image/*">
           </div>
         </form>
@@ -497,8 +531,8 @@ Best regards</textarea>
 
   <footer style="text-align: center; padding: 24px; border-top: 1px solid var(--border); margin-top: 24px;">
     <div style="margin-bottom: 8px;">
-      <a href="/imprint.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;">Imprint</a>
-      <a href="/privacy.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;">Privacy Policy</a>
+      <a href="/imprint.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;" data-i18n="footer.imprint">Imprint</a>
+      <a href="/privacy.html" style="color: var(--text-muted); margin: 0 12px; font-size: 0.8rem; text-decoration: none;" data-i18n="footer.privacy">Privacy Policy</a>
     </div>
   </footer>
 
@@ -511,6 +545,31 @@ Best regards</textarea>
     let config = null;
     let positions = null;
     const SCALE_FACTOR = 0.4;
+
+    // Initialize i18n
+    document.addEventListener('DOMContentLoaded', async () => {
+      await i18n.init();
+      updateLangButtons();
+      // Set default remarks
+      document.getElementById('additional').value = i18n.t('generator.defaultRemarks');
+    });
+
+    function switchLang(lang) {
+      i18n.setLanguage(lang);
+      updateLangButtons();
+      // Update default remarks if empty or default value
+      const additionalEl = document.getElementById('additional');
+      const currentVal = additionalEl.value;
+      if (currentVal === 'Thanks for the QSO\nBest regards' || currentVal === 'Danke für das QSO\nBeste Grüße') {
+        additionalEl.value = i18n.t('generator.defaultRemarks');
+      }
+    }
+
+    function updateLangButtons() {
+      const lang = i18n.getLanguage();
+      document.getElementById('langDe').classList.toggle('active', lang === 'de');
+      document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    }
 
     const canvas = document.getElementById('qslCanvas');
     const ctx = canvas.getContext('2d');
@@ -579,10 +638,10 @@ Best regards</textarea>
           localStorage.setItem('authToken', token);
           checkAccess();
         } else {
-          showAuthError(data.error || 'Login failed');
+          showAuthError(data.error || i18n.t('errors.loginFailed'));
         }
       } catch (e) {
-        showAuthError('Connection error');
+        showAuthError(i18n.t('errors.connectionError'));
       }
     }
 
@@ -629,7 +688,7 @@ Best regards</textarea>
         const response = await apiCall(`/api/generator/${CALLSIGN}/backgrounds`);
         const backgrounds = await response.json();
         const select = document.getElementById('backgroundSelect');
-        select.innerHTML = '<option value="">Select a background...</option>';
+        select.innerHTML = `<option value="" data-i18n="generator.selectBackground">${i18n.t('generator.selectBackground')}</option>`;
 
         backgrounds.forEach(bg => {
           const option = document.createElement('option');
@@ -731,7 +790,7 @@ Best regards</textarea>
           if (!customOpt) {
             customOpt = document.createElement('option');
             customOpt.value = 'custom';
-            customOpt.textContent = 'Custom Upload';
+            customOpt.textContent = i18n.t('generator.customUpload');
             select.appendChild(customOpt);
           }
           select.value = 'custom';
