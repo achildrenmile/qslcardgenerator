@@ -244,21 +244,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/cards', express.static(CARDS_DIR));
 
 // ============================================
-// Public API Routes
+// Public API Routes (limited)
 // ============================================
 
-// List all callsigns
-app.get('/api/callsigns', apiLimiter, (req, res) => {
-  const data = loadCallsigns();
-  const publicData = data.callsigns.map(c => ({
-    id: c.id,
-    name: c.name,
-    qrzLink: c.qrzLink
-  }));
-  res.json(publicData);
-});
-
-// Get specific callsign configuration
+// Get specific callsign configuration (used by admin)
 app.get('/api/callsigns/:callsign', apiLimiter, (req, res) => {
   const callsign = req.params.callsign.toLowerCase();
   const config = getCallsignConfig(callsign);
@@ -613,6 +602,16 @@ app.delete('/api/admin/users/:id', requireAuth, requireAdmin, (req, res) => {
   db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
 
   res.json({ success: true });
+});
+
+// List all callsigns (admin only)
+app.get('/api/admin/callsigns', requireAuth, requireAdmin, (req, res) => {
+  const data = loadCallsigns();
+  res.json(data.callsigns.map(c => ({
+    id: c.id,
+    name: c.name,
+    qrzLink: c.qrzLink
+  })));
 });
 
 // Create callsign (admin only)

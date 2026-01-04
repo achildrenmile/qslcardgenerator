@@ -444,10 +444,10 @@
       }
     }
 
-    // Load callsigns
+    // Load callsigns (admin only)
     async function loadCallsigns() {
       try {
-        const response = await fetch('/api/callsigns');
+        const response = await apiCall('/api/admin/callsigns');
         callsigns = await response.json();
 
         // Update list

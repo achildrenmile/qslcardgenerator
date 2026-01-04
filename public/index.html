@@ -35,35 +35,48 @@
       font-size: 1.1rem;
     }
 
-    .callsign-card {
+    .auth-container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .card-container {
       background: var(--card-bg);
       border-radius: 12px;
       padding: 25px;
-      text-align: center;
-      transition: transform 0.2s, box-shadow 0.2s;
-      text-decoration: none;
-      color: var(--text);
-      display: block;
-      height: 100%;
     }
 
-    .callsign-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+    .form-control {
+      background: #0f0f23;
+      border: 1px solid #333;
       color: var(--text);
     }
 
-    .callsign-card h3 {
-      font-size: 1.8rem;
-      color: var(--accent);
-      margin-bottom: 8px;
-      font-weight: 700;
+    .form-control:focus {
+      background: #0f0f23;
+      border-color: var(--accent);
+      color: var(--text);
+      box-shadow: 0 0 0 0.2rem rgba(233, 69, 96, 0.25);
     }
 
-    .callsign-card p {
+    .form-control::placeholder {
       color: var(--text-muted);
-      margin: 0;
+    }
+
+    .form-label {
+      color: var(--text-muted);
       font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      padding: 12px 30px;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #c73e54;
     }
 
     .loading {
@@ -85,17 +98,14 @@
       to { transform: rotate(360deg); }
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--text-muted);
-    }
-
     footer {
       text-align: center;
       padding: 30px;
       color: var(--text-muted);
       font-size: 0.85rem;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
     }
 
     footer a {
@@ -113,58 +123,149 @@
 
     <div id="loading" class="loading">
       <div class="loading-spinner"></div>
-      <p>Loading callsigns...</p>
+      <p>Loading...</p>
     </div>
 
-    <div id="callsigns" class="row g-4" style="display: none;"></div>
+    <div id="loginSection" class="auth-container" style="display: none;">
+      <div class="card-container">
+        <h4 class="mb-4 text-center">Login</h4>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="loginUsername" placeholder="Enter username">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="Enter password">
+        </div>
+        <button class="btn btn-primary w-100" onclick="login()">Login</button>
+        <div id="authError" class="text-danger mt-2 text-center" style="display:none;"></div>
+      </div>
+    </div>
 
-    <div id="empty" class="empty-state" style="display: none;">
-      <h3>No callsigns configured</h3>
-      <p>Contact the administrator to add your callsign.</p>
+    <div id="noCallsign" class="auth-container" style="display: none;">
+      <div class="card-container text-center">
+        <h4 class="mb-3">No Callsign Assigned</h4>
+        <p class="text-muted">Your account does not have a callsign assigned. Please contact the administrator.</p>
+        <button class="btn btn-outline-secondary mt-3" onclick="logout()">Logout</button>
+      </div>
     </div>
   </div>
 
   <footer>
     <p>QSL Card Generator for Amateur Radio Operators</p>
-    <p><a href="/admin.html">Admin</a></p>
   </footer>
 
   <script>
-    async function loadCallsigns() {
+    let token = localStorage.getItem('authToken') || '';
+
+    async function checkAuth() {
+      if (!token) {
+        showLogin();
+        return;
+      }
+
       try {
-        const response = await fetch('/api/callsigns');
-        const callsigns = await response.json();
+        const response = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-        document.getElementById('loading').style.display = 'none';
-
-        if (callsigns.length === 0) {
-          document.getElementById('empty').style.display = 'block';
+        if (!response.ok) {
+          token = '';
+          localStorage.removeItem('authToken');
+          showLogin();
           return;
         }
 
-        const container = document.getElementById('callsigns');
-        container.style.display = 'flex';
+        const user = await response.json();
 
-        callsigns.forEach(cs => {
-          const col = document.createElement('div');
-          col.className = 'col-6 col-md-4 col-lg-3';
-
-          col.innerHTML = `
-            <a href="/${cs.id}" class="callsign-card">
-              <h3>${cs.id.toUpperCase()}</h3>
-              <p>${cs.name}</p>
-            </a>
-          `;
-
-          container.appendChild(col);
-        });
+        // Redirect to generator if user has a callsign
+        if (user.callsign) {
+          window.location.href = `/${user.callsign}`;
+        } else if (user.isAdmin) {
+          // Admin without callsign goes to admin panel
+          window.location.href = '/admin.html';
+        } else {
+          // User without callsign
+          showNoCallsign();
+        }
       } catch (error) {
-        console.error('Failed to load callsigns:', error);
-        document.getElementById('loading').innerHTML = '<p class="text-danger">Failed to load callsigns</p>';
+        console.error('Auth check failed:', error);
+        showLogin();
       }
     }
 
-    loadCallsigns();
+    function showLogin() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'block';
+      document.getElementById('noCallsign').style.display = 'none';
+    }
+
+    function showNoCallsign() {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('noCallsign').style.display = 'block';
+    }
+
+    async function login() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!username || !password) {
+        showAuthError('Please enter username and password');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          token = data.token;
+          localStorage.setItem('authToken', token);
+
+          // Redirect based on user type
+          if (data.user.callsign) {
+            window.location.href = `/${data.user.callsign}`;
+          } else if (data.user.isAdmin) {
+            window.location.href = '/admin.html';
+          } else {
+            showNoCallsign();
+          }
+        } else {
+          showAuthError(data.error || 'Login failed');
+        }
+      } catch (e) {
+        showAuthError('Connection error');
+      }
+    }
+
+    function logout() {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+      localStorage.removeItem('authToken');
+      token = '';
+      showLogin();
+    }
+
+    function showAuthError(msg) {
+      const el = document.getElementById('authError');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    // Allow Enter key to login
+    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') login();
+    });
+
+    // Initialize
+    checkAuth();
   </script>
 </body>
 </html>
