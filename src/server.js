@@ -241,7 +241,7 @@ function requireCallsignAccess(req, res, next) {
 // ============================================
 
 app.use(express.static(path.join(__dirname, '../public')));
-app.use('/cards', express.static(CARDS_DIR));
+// Note: /cards is NOT served statically - protected endpoints below
 
 // ============================================
 // Public API Routes (limited)
@@ -801,6 +801,48 @@ app.get('/api/admin/audit', requireAuth, requireAdmin, (req, res) => {
     SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?
   `).all(limit);
   res.json(logs);
+});
+
+// ============================================
+// Protected Card Image Routes
+// ============================================
+
+// Serve card template (protected)
+app.get('/api/cards/:callsign/card.png', requireAuth, (req, res) => {
+  const callsign = req.params.callsign.toLowerCase();
+
+  // Check ownership (user owns callsign or is admin)
+  if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const filePath = path.join(CARDS_DIR, callsign, 'card.png');
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Card template not found' });
+  }
+
+  res.sendFile(filePath);
+});
+
+// Serve background image (protected)
+app.get('/api/cards/:callsign/backgrounds/:filename', requireAuth, (req, res) => {
+  const callsign = req.params.callsign.toLowerCase();
+  const filename = req.params.filename;
+
+  // Check ownership (user owns callsign or is admin)
+  if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  // Sanitize filename to prevent directory traversal
+  const sanitizedFilename = path.basename(filename);
+  const filePath = path.join(CARDS_DIR, callsign, 'backgrounds', sanitizedFilename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Background not found' });
+  }
+
+  res.sendFile(filePath);
 });
 
 // ============================================

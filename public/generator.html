@@ -426,6 +426,18 @@ Best regards</textarea>
       }
     }
 
+    // Load image with authentication
+    async function loadAuthenticatedImage(img, url) {
+      try {
+        const response = await apiCall(url);
+        if (!response.ok) throw new Error('Failed to load image');
+        const blob = await response.blob();
+        img.src = URL.createObjectURL(blob);
+      } catch (error) {
+        console.error('Failed to load image:', error);
+      }
+    }
+
     // Load card template image
     function loadCardImage() {
       cardImage.onload = () => {
@@ -433,13 +445,13 @@ Best regards</textarea>
         canvas.height = cardImage.height * SCALE_FACTOR;
         drawCanvas();
       };
-      cardImage.src = `/cards/${CALLSIGN}/card.png`;
+      loadAuthenticatedImage(cardImage, `/api/cards/${CALLSIGN}/card.png`);
     }
 
     // Load background image
     function loadBackground(filename) {
       backgroundImage.onload = drawCanvas;
-      backgroundImage.src = `/cards/${CALLSIGN}/backgrounds/${filename}`;
+      loadAuthenticatedImage(backgroundImage, `/api/cards/${CALLSIGN}/backgrounds/${filename}`);
     }
 
     // Draw canvas with all layers
