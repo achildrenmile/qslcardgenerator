@@ -304,12 +304,8 @@ Best regards</textarea>
 
         // Check access to this callsign
         const accessResponse = await apiCall(`/api/generator/${CALLSIGN}/access`);
-        if (accessResponse.status === 403) {
-          showAccessDenied();
-          return;
-        }
-
         if (!accessResponse.ok) {
+          // Show generic not found for any error (prevents enumeration)
           window.location.href = '/';
           return;
         }

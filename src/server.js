@@ -230,7 +230,7 @@ function requireCallsignAccess(req, res, next) {
 
   // Users can only access their own callsign
   if (req.user.callsign?.toLowerCase() !== targetCallsign) {
-    return res.status(403).json({ error: 'Access denied to this callsign' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   next();
@@ -732,7 +732,7 @@ app.get('/api/generator/:callsign/access', requireAuth, (req, res) => {
   // Check if user owns this callsign or is admin
   if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
     logAudit(req, 'generator_access_denied', `Attempted access to ${callsign}`);
-    return res.status(403).json({ error: 'Access denied. You can only generate cards for your own callsign.' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   const config = getCallsignConfig(callsign);
@@ -750,7 +750,7 @@ app.get('/api/generator/:callsign/backgrounds', requireAuth, (req, res) => {
 
   // Check if user owns this callsign or is admin
   if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
-    return res.status(403).json({ error: 'Access denied' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   const bgDir = path.join(CARDS_DIR, callsign, 'backgrounds');
@@ -787,7 +787,7 @@ app.post('/api/generator/:callsign/download', requireAuth, (req, res) => {
 
   // Check if user owns this callsign or is admin
   if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
-    return res.status(403).json({ error: 'Access denied' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   logAudit(req, 'card_generated', `Generated card for ${targetCallsign || 'unknown'}`);
@@ -813,7 +813,7 @@ app.get('/api/cards/:callsign/card.png', requireAuth, (req, res) => {
 
   // Check ownership (user owns callsign or is admin)
   if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
-    return res.status(403).json({ error: 'Access denied' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   const filePath = path.join(CARDS_DIR, callsign, 'card.png');
@@ -831,7 +831,7 @@ app.get('/api/cards/:callsign/backgrounds/:filename', requireAuth, (req, res) =>
 
   // Check ownership (user owns callsign or is admin)
   if (!req.user.is_admin && req.user.callsign?.toLowerCase() !== callsign) {
-    return res.status(403).json({ error: 'Access denied' });
+    return res.status(404).json({ error: 'Not found' });
   }
 
   // Sanitize filename to prevent directory traversal
