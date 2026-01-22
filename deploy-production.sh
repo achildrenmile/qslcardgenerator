@@ -43,7 +43,7 @@ ssh $SYNOLOGY_HOST "/usr/local/bin/docker run -d \
   -p $CONTAINER_PORT \
   -e PORT=3400 \
   -v /volume1/docker/qslcardgenerator/data:/app/data \
-  --health-cmd='wget -q -O /dev/null http://localhost:3400/ || exit 1' \
+  --health-cmd='wget -q -O /dev/null http://localhost:3400/health || exit 1' \
   --health-interval=30s \
   --health-timeout=10s \
   --health-retries=3 \

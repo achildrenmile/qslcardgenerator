@@ -19,6 +19,6 @@ RUN mkdir -p /app/data/cards
 EXPOSE 3400
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD wget -q -O /dev/null http://localhost:3400/ || exit 1
+    CMD wget -q -O /dev/null http://localhost:3400/health || exit 1
 
 CMD ["node", "src/server.js"]
