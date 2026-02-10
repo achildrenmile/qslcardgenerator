@@ -1,0 +1,19 @@
+{
+  "callsign": "OE8KKS",
+  "callsignColor": "#FF0000",
+  "operator": {
+    "name": "Stefan Johannes Kaiser",
+    "address": ["Oberer Dammweg 2a", "9761 Greifenburg", "AUSTRIA"],
+    "email": null
+  },
+  "logo": {
+    "file": "data/cards/oe8yml/logo.png",
+    "size": 900
+  },
+  "signature": {
+    "text": "Stefan",
+    "color": "#000000"
+  },
+  "qrzLink": "https://www.qrz.com/db/OE8KKS",
+  "registerCallsign": true
+}

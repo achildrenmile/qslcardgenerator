@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "init-admin": "node scripts/init-admin.js"
+    "init-admin": "node scripts/init-admin.js",
+    "generate-card": "python3 scripts/generate-card.py"
   },
   "author": "OE8YML",
   "license": "MIT",

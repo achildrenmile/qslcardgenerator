@@ -13,6 +13,9 @@ COPY src ./src
 COPY public ./public
 COPY scripts ./scripts
 
+# Install Python and Pillow for card template generation
+RUN apk add --no-cache python3 py3-pillow font-dejavu font-freefont
+
 # Create data directory
 RUN mkdir -p /app/data/cards
 

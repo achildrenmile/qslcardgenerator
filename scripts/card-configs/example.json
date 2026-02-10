@@ -1,0 +1,27 @@
+{
+  "_comment": "Example config for generate-card.py. Copy this file and customize.",
+
+  "callsign": "OE0XXX",
+  "callsignColor": "#FF0000",
+
+  "operator": {
+    "name": "First Last",
+    "address": ["Street 1", "1234 City", "COUNTRY"],
+    "email": null
+  },
+
+  "logo": {
+    "_comment": "Path relative to project root, or absolute. Set file to null for no logo.",
+    "file": null,
+    "size": 900
+  },
+
+  "signature": {
+    "_comment": "Italic text drawn in signature box. Set text to null for no signature.",
+    "text": null,
+    "color": "#000000"
+  },
+
+  "qrzLink": "https://www.qrz.com/db/OE0XXX",
+  "registerCallsign": true
+}
