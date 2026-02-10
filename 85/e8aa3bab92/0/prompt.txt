@@ -1,0 +1,94 @@
+https://qsl.oeradio.at/api/cards/oe8yml/card.png
+https://qsl.oeradio.at/api/cards/oe8kks/card.png oe8kks shall have its own data, but also have the data field like oe8yml. data for oe8kks you can find here https://www.qrz.com/db/OE8KKS
+
+---
+
+can you copy the card.png from oe8yml for now as a placeholder
+
+---
+
+not visible in prod on qsl.oeradio.at
+
+---
+
+[Request interrupted by user]
+
+---
+
+roll out
+
+---
+
+now change the png from oe8kks. remove the oe8yml details and add oe8kks details instead. also remove all logos, except amateurfunkclub spittal
+
+---
+
+OE8KKS Austria flag Austria
+Stefan Johannes Kaiser
+Oberer Dammweg 2a
+9761 Greifenburg
+Austria
+
+---
+
+id do not see a change
+
+---
+
+https://qsl.oeradio.at/api/cards/oe8kks/card.png
+
+---
+
+yes create a user for oe8kks and then check yourself
+
+---
+
+not the kks image! you are lying
+
+---
+
+yes, hard refresh did not work
+
+---
+
+what is the password of oe8kks
+
+---
+
+checked the png. not working as expected. the address data is moving into the logo. so it has to moved at least 70px down. the frequeny, mode and r-s-t is not 100% visible. they are cut in the middle. fix this
+
+---
+
+go on
+
+---
+
+password from oe8kks please
+
+---
+
+address data has to moved more down, as ist in the logo. the signatur shall be placed on white background and match exactly in the signature field
+
+---
+
+the signature box where stefan is written is a bit to high, so it is overlapping the whit box. the addressbox could have a white box backround with opacity to read the black better
+
+---
+
+the logo is a bit cut off in the end
+
+---
+
+go on
+
+---
+
+write stefan in black and move only the word stefan up, without changing anthing in the box. middle would be great
+
+---
+
+what you did know... make a script so that one can create a card.png for upcoming callsigns. the colors and the image, address data, callsign, signature shall be configurable. also check if other parameters would make sense to be paramatrized
+
+---
+
+[Request interrupted by user for tool use]
