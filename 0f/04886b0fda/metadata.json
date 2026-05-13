@@ -3,10 +3,11 @@
   "checkpoint_id": "0f04886b0fda",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     "Dockerfile",
     "package.json",
+    "public/generator.html",
     "scripts/card-configs/example.json",
     "scripts/card-configs/oe8kks.json",
     "scripts/generate-card.py"
@@ -18,13 +19,20 @@
       "context": "/0f/04886b0fda/0/context.md",
       "content_hash": "/0f/04886b0fda/0/content_hash.txt",
       "prompt": "/0f/04886b0fda/0/prompt.txt"
+    },
+    {
+      "metadata": "/0f/04886b0fda/1/metadata.json",
+      "transcript": "/0f/04886b0fda/1/full.jsonl",
+      "context": "/0f/04886b0fda/1/context.md",
+      "content_hash": "/0f/04886b0fda/1/content_hash.txt",
+      "prompt": "/0f/04886b0fda/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 1642,
-    "cache_creation_tokens": 44066,
-    "cache_read_tokens": 1234227,
-    "output_tokens": 1368,
-    "api_call_count": 31
+    "input_tokens": 1664,
+    "cache_creation_tokens": 60657,
+    "cache_read_tokens": 1365159,
+    "output_tokens": 2620,
+    "api_call_count": 43
   }
 }
