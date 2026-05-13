@@ -1,0 +1,30 @@
+[23:27, 2026/5/8] Sergio Huainigg OE8CXC: erus schau mal beim qsl generator da kann ich mobile ned auf Download klicken
+[23:27, 2026/5/8] Sergio Huainigg OE8CXC: Kein Event wird getriggert
+
+---
+
+yes
+
+---
+
+yes, push and deploy
+
+---
+
+check bitte mal auf achildrenmile@host-node-01, ob es nicht dort deployed ist
+
+---
+
+download funktioniert nicht am handy
+
+---
+
+ja, bitte
+
+---
+
+funktioniert. menu header am mobile ist grausig. der ist zusammengeschoben und shcießt auch drüber hinaus
+
+---
+
+ja
