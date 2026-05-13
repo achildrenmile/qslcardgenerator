@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "0f04886b0fda",
+  "session_id": "c7050d84-17ca-4c40-9974-90c44d370cf0",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-13T14:05:58.768468653Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "Dockerfile",
+    "package.json",
+    "scripts/card-configs/example.json",
+    "scripts/card-configs/oe8kks.json",
+    "scripts/generate-card.py"
+  ],
+  "agent": "Claude Code",
+  "token_usage": {
+    "input_tokens": 1642,
+    "cache_creation_tokens": 44066,
+    "cache_read_tokens": 1234227,
+    "output_tokens": 1368,
+    "api_call_count": 31
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-13T14:05:58.487315533Z",
+    "agent_lines": 0,
+    "human_added": 3,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 3,
+    "agent_percentage": 0
+  }
+}

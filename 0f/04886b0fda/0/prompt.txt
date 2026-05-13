@@ -1,0 +1,121 @@
+Implement the following plan:
+
+# QSL Card Template Generator Script
+
+## Context
+Currently, creating a new callsign's card.png requires manual image editing (as done for OE8KKS). This script automates that process so new callsigns can get a properly generated card template from a simple JSON config.
+
+## Files to Create/Modify
+
+### New Files
+- `scripts/generate-card.py` — Python/Pillow image generator (core logic)
+- `scripts/card-configs/example.json` — Documented example config
+- `scripts/card-configs/oe8kks.json` — OE8KKS config as a real example
+
+### Modified Files
+- `Dockerfile` — Add `python3`, `py3-pillow`, `font-dejavu`, `font-freefont` packages
+- `package.json` — Add `"generate-card"` npm script
+
+## Config Schema (`scripts/card-configs/<callsign>.json`)
+
+```json
+{
+  "callsign": "OE8KKS",
+  "callsignColor": "#FF0000",
+  "operator": {
+    "name": "Stefan Johannes Kaiser",
+    "address": ["Oberer Dammweg 2a", "9761 Greifenburg", "AUSTRIA"],
+    "email": null
+  },
+  "logo": {
+    "file": "data/cards/oe8yml/logo.png",
+    "size": 900
+  },
+  "signature": {
+    "text": "Stefan",
+    "color": "#000000"
+  },
+  "qrzLink": "https://www.qrz.com/db/OE8KKS",
+  "registerCallsign": true
+}
+```
+
+### Configurable Parameters
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `callsign` | required | Callsign text (uppercased) |
+| `callsignColor` | `#FF0000` | Color of large callsign text |
+| `operator.name` | required | Operator full name |
+| `operator.address` | required | Address lines array |
+| `operator.email` | null | Optional email |
+| `logo.file` | null | Path to club logo image |
+| `logo.size` | 900 | Logo diameter in pixels |
+| `signature.text` | null | Signature text (italic serif) |
+| `signature.color` | `#000000` | Signature color |
+| `qrzLink` | auto from callsign | QRZ.com link |
+| `registerCallsign` | true | Add to callsigns.json + create dirs |
+
+### Fixed Constants (not configurable)
+- Canvas: 4837 x 3078 RGBA
+- QSO data section layout (all box positions, labels, colors)
+- Text positions in callsigns.json (standard defaults)
+- Font sizes for QSO labels
+
+## Script Architecture
+
+**Single Python script** (`scripts/generate-card.py`) that:
+
+1. Parses `--config <file>` and `--output <path>` args
+2. Creates transparent 4837x3078 RGBA canvas
+3. Draws standard QSO section (semi-transparent bg, black label boxes, white text, data entry areas, remarks box, signature box)
+4. Draws configurable elements (callsign text, operator info with white bg, logo, signature)
+5. Optionally registers callsign in callsigns.json and creates directory structure
+6. Saves as PNG
+
+**Usage:**
+```bash
+# Local (nix)
+nix-shell -p "python3.withPackages (ps: [ps.pillow])" dejavu_fonts freefont_ttf \
+  --run "python3 scripts/generate-card.py --config scripts/card-configs/oe8kks.json"
+
+# Docker
+docker exec qslcardgenerator python3 scripts/generate-card.py --config scripts/card-configs/oe8kks.json
+
+# npm shortcut
+npm run generate-card -- --config scripts/card-configs/oe8kks.json
+```
+
+**Font resolution:** Try glob `/nix/store/*/share/fonts/truetype/DejaVu*.ttf` first, then `/usr/share/fonts/`, then Pillow default.
+
+## Drawing Order (back to front)
+1. QSO section semi-transparent background
+2. Operator info semi-transparent white box
+3. Data entry areas (white, higher alpha)
+4. Remarks box (opaque white, left)
+5. Signature box (opaque white, right)
+6. Black label boxes (Your callsign, UTC, Freq, Mode, RST)
+7. White text inside black boxes
+8. "QSO DATA" heading
+9. Callsign text (large, top right)
+10. Operator name + address
+11. Logo image (with circular mask)
+12. Signature text (italic)
+
+## Dockerfile Change
+```dockerfile
+# Add after COPY scripts line:
+RUN apk add --no-cache python3 py3-pillow font-dejavu font-freefont
+```
+
+## Verification
+1. Run script with OE8KKS config, compare output to existing card.png
+2. Run script with a new test callsign, verify callsigns.json updated
+3. Load generated card in the web generator, verify QSO fields align
+4. Build Docker image, run script inside container
+
+
+If you need specific details from before exiting plan mode (like exact code snippets, error messages, or content you generated), read the full transcript at: /home/achildrenmile/.REDACTED.jsonl
+
+---
+
+[Image: original 4837x3078, displayed at 2000x1273. Multiply coordinates by 2.42 to map to original image.]
