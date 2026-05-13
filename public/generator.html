@@ -803,24 +803,29 @@
       el.addEventListener('input', drawCanvas);
     });
 
-    document.getElementById('downloadBtn').addEventListener('click', async function() {
+    document.getElementById('downloadBtn').addEventListener('click', function() {
       const callsignVal = document.getElementById('callsign').value || 'QSL';
+      const filename = `${callsignVal.toUpperCase()}.png`;
 
-      try {
-        await apiCall(`/api/generator/${CALLSIGN}/download`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ targetCallsign: callsignVal.toUpperCase() })
-        });
-      } catch (e) {}
+      // Fire analytics in background, don't await (preserves user gesture)
+      apiCall(`/api/generator/${CALLSIGN}/download`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetCallsign: callsignVal.toUpperCase() })
+      }).catch(() => {});
 
-      const link = document.createElement('a');
-      link.download = `${callsignVal.toUpperCase()}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      canvas.toBlob(function(blob) {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }, 'image/png');
     });
 
     function setCurrentUTC() {
