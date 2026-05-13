@@ -817,7 +817,10 @@
       const link = document.createElement('a');
       link.download = `${callsignVal.toUpperCase()}.png`;
       link.href = canvas.toDataURL('image/png');
+      link.style.display = 'none';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     });
 
     function setCurrentUTC() {
